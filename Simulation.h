@@ -4,7 +4,15 @@
 
 class Simulation
 {
+  private:
+      Vehicle *allVehicles;
+      Map *roadMap;
 
+    public:
+      Simulation();
+      ~Simulation();
+      void runSimulation();
+      void PrintReport();
 };
 
 #endif
