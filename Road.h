@@ -13,7 +13,7 @@ class Road
 		int speedLimit;
 
 	public:
-		bool isPointOnRoad()
+		bool isPointOnRoad();
 };
 
 
