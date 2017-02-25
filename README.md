@@ -1,2 +1,2 @@
-# traffic-simulation
+# Traffic Simulation
 Working traffic simulation project
