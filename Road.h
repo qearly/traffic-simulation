@@ -1,12 +1,16 @@
 #ifndef ROAD_H_
 #define ROAD_H_
 
+#include <string>
+
 class Road
 {
-  private:
+	private:
 		string roadName;
-		int startPoint;
-		int endpoint;
+		double xStartPoint;
+		double yStartPoint;
+		double xEndpoint;
+		double yEndPoint;
 		int laneNumber;
 		int startIntersection;
 		int endIntersection;
@@ -14,21 +18,25 @@ class Road
 
 	public:
 		bool isPointOnRoad();
-		void setRoadStart (int startingPoint);
-		void setRoadEnd(int endingPoint);
+
+		void setxRoadStart (double startingPoint);
+		void setxRoadEnd(double endingPoint);
+		void setyRoadStart(double startingPoint);
+		void setyRoadEnd(double endingPoint);
 		void setLaneNumber(int lane);
 		void setStartIntersection(int startingPoint);
 		void setEndIntersection(int endingPoint);
 		void setSpeedLimit(int limit);
-		int getRoadStart();
-		int getRoadEnd();		
+
+		double getxRoadStart();
+		double getxRoadEnd();		
+		double getyRoadEnd();
+		double getyRoadEnd();
 		int getLaneNumber();		
 		int getStartIntersection();		
 		int getEndIntersection();		
 		int getSpeedLimit();
 };
-
-
 
 
 
