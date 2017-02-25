@@ -14,7 +14,16 @@ Road::~Road()
 
 bool Road::isPointOnRoad()
 {
+	double xUpperLeft;
+	double yUpperLeft;
+	double xLowerRight;
+	double yLowerLeft;
 
+	// For North-South
+	xUpperLeft = getxRoadStart() - ((laneNumber / 2) * 3.6);
+	yUpperLeft = getyRoadStart();
+	xLowerRight = getxRoadEnd() + ((laneNumber / 2) * 3.6);
+	yLowerLeft = getyRoadEnd();
 }
 
 void Road::setRoadName(string name)
