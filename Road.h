@@ -14,6 +14,18 @@ class Road
 
 	public:
 		bool isPointOnRoad();
+		void setRoadStart (int startingPoint);
+		void setRoadEnd(int endingPoint);
+		void setLaneNumber(int lane);
+		void setStartIntersection(int startingPoint);
+		void setEndIntersection(int endingPoint);
+		void setSpeedLimit(int limit);
+		int getRoadStart();
+		int getRoadEnd();		
+		int getLaneNumber();		
+		int getStartIntersection();		
+		int getEndIntersection();		
+		int getSpeedLimit();
 };
 
 
