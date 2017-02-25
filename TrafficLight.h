@@ -7,12 +7,7 @@ class TrafficLight
 {
 	private:
 		Intersection *intersectInstance;
-		enum LightState
-		{
-			green,
-			red,
-			yellow
-		};
+		enum LightState {GREEN, RED, YELLOW};
 
 	public:
 		void upDate();
