@@ -3,17 +3,22 @@
 
 class Map
 {
-  private:
-		list<Road>*roadCollection;
-		list<Intersection>intersectCollection;
+	private:
+		
 
 	public:
-		Map();
+		vector<Road*>roadCollection;
+		vector<Intersection*>intersectCollection;
+		Map(TrafficSimDataParser *dp);
 		~Map();
-		void addRoad();
-		void addIntersection();
+		Road *getRoad(char *rdID);
+		Road *getRoad(double x, double y, double dir);
+		void addIntersection(Intersection *i);
+		Intersection *getIntersection(int id);
+		Intersection *getNextIntersection(double x, double y, double dir);
+		Intersection *getIntersection(double x, double y);
 		void PrintReport();
-		void upDate();
+		void upDate(double time);
 };
 
 #endif
