@@ -14,90 +14,90 @@ void Vehicle::PrintReport()
 
 void Vehicle::setType(string name)
 {
-
+	type = name;
 }
 
 void Vehicle::setCarID(int ID)
 {
-
+	carID = ID;
 }
 
 string Vehicle::getType()
 {
-	return string();
+	return type;
 }
 
 int Vehicle::getCarID()
 {
-	return 0;
+	return carID;
 }
 
 void Vehicle::setxIntersectStartPoint(double start)
 {
-
+	xIntersectStartPoint = start;
 }
 
 void Vehicle::setyIntersectStartPoint(double start)
 {
-
+	yIntersectStartPoint = start;
 }
 
 void Vehicle::setIntersectStartDirection(int start)
 {
-
+	intersectStartDirection = start;
 }
 
 void Vehicle::setIntersectAcceleration(double acceleration)
 {
-
+	intersectAcceleration = acceleration;
 }
 
 void Vehicle::setIntersectSpeed(double speed)
 {
-
+	intersectSpeed = speed;
 }
 
 void Vehicle::setxIntersectLocation(double location)
 {
-
+	xIntersectLocation = location;
 }
 
 void Vehicle::setyIntersectLocation(double location)
 {
-
+	yIntersectLocation = location;
 }
 
 double Vehicle::getxIntersectionStartPoint()
 {
-	return 0.0;
+	return xIntersectStartPoint;
 }
 
 double Vehicle::getyIntersectionStartPoint()
 {
-	return 0.0;
+	return yIntersectStartPoint;
 }
 
 int Vehicle::getIntersectStartDirection()
 {
-	return 0;
+	return intersectStartDirection;
 }
 
 double Vehicle::getIntersectAcceleration()
 {
-	return 0.0;
+	return intersectAcceleration;
 }
 
 double Vehicle::getIntersectSpeed()
 {
-	return 0.0;
+	return intersectSpeed;
 }
 
 double Vehicle::getxIntersectLocation()
 {
-	return 0.0;
+	return xIntersectLocation;
 }
 
 double Vehicle::getyIntersectLocation()
 {
-	return 0.0;
+	return yIntersectLocation;
 }
