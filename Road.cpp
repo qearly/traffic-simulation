@@ -1,4 +1,7 @@
 #include "Road.h"
+#include "Map.h"
+#include "TrafficSimDataParser.h"
+#include <vector>
 
 using namespace std;
 
@@ -17,13 +20,74 @@ bool Road::isPointOnRoad()
 	double xUpperLeft;
 	double yUpperLeft;
 	double xLowerRight;
-	double yLowerLeft;
+	double yLowerRight;
 
-	// For North-South
-	xUpperLeft = getxRoadStart() - ((laneNumber / 2) * 3.6);
-	yUpperLeft = getyRoadStart();
-	xLowerRight = getxRoadEnd() + ((laneNumber / 2) * 3.6);
-	yLowerLeft = getyRoadEnd();
+	vector<Road*>::iterator it;
+	Map *vec;
+	
+	for (it = vec->roadCollection.begin(); it <= vec->roadCollection.end(); it++)
+	{
+		getxRoadStart();
+		getyRoadStart();
+		getxRoadEnd();
+		getyRoadEnd();
+		getxCoord();
+		getyCoord();
+		getLaneNumber();
+		getDirectionNS();
+		getDirectionEW();
+
+		if (directionNS = true)
+		{ 
+			// For North-South
+			xUpperLeft = getxRoadStart() - ((getLaneNumber() / 2) * 3.6);
+			yUpperLeft = getyRoadStart();
+			xLowerRight = getxRoadEnd() + ((getLaneNumber() / 2) * 3.6);
+			yLowerRight = getyRoadEnd();
+
+			if ((getxCoord() >= xUpperLeft) && (getxCoord() <= xLowerRight) && (getyCoord() >= yUpperLeft) && (getyCoord() <= yLowerRight))
+			{
+				return true;
+			}
+
+		}
+
+		else if (directionEW = true)
+		{
+			// For East-West
+			xUpperLeft = getxRoadStart();
+			yUpperLeft = getyRoadStart() - ((getLaneNumber() / 2) * 3.6);
+			xLowerRight = getyRoadEnd();
+			yLowerRight = getyRoadEnd() - ((getLaneNumber() / 2) * 3.6);
+
+			if ((getxCoord() >= xUpperLeft) && (getxCoord() <= xLowerRight) && (getyCoord() >= yUpperLeft) && (getyCoord() <= yLowerRight))
+			{
+				return true;
+			}
+		}
+	}
+
+	
+}
+
+void Road::setDirectionNS(bool value)
+{
+	directionNS = value;
+}
+
+void Road::setDirectionEW(bool value)
+{
+	directionEW = value;
+}
+
+bool Road::getDirectionNS()
+{
+	return directionNS;
+}
+
+bool Road::getDirectionEW()
+{
+	return directionEW;
 }
 
 void Road::setRoadName(string name)
@@ -111,7 +175,27 @@ void Road::setSpeedLimit(int limit)
 	speedLimit = limit;
 }
 
+void Road::setxCoord(double x)
+{
+	xCoord = x;
+}
+
+void Road::setyCoord(double y)
+{
+	yCoord = y;
+}
+
 int Road::getSpeedLimit()
 {
 	return speedLimit;
+}
+
+double Road::getxCoord()
+{
+	return xCoord;
+}
+
+double Road::getyCoord()
+{
+	return yCoord;
 }
