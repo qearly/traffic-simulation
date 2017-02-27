@@ -1,63 +1,121 @@
 #include "Intersection.h"
+#include "Road.h"
+#include "TrafficLight.h"
 
 using namespace std;
 
 bool Intersection::isPointInIntersection()
 {
-	return false;
+	Road *road = new Road();
+
+	double xUpperLeft = xCenterPoint - (road->getLaneNumber() / 2 * 36.6);
+	double yUpperLeft = yCenterPoint - (road->getLaneNumber() / 2 * 36.6);
+	double xLowerRight = xCenterPoint + (road->getLaneNumber() / 2 * 36.6);
+	double yLowerRight = yCenterPoint + (road->getLaneNumber() / 2 * 36.6);
+
+	if ((xCenterPoint >= xUpperLeft) && (xCenterPoint <= xLowerRight) && (yCenterPoint >= yUpperLeft) && (yCenterPoint <= yLowerRight))
+	{
+		return true;
+	}
+	
+	else
+	{
+		return false;
+	}
 }
 
 void Intersection::upDate()
 {
-
+	TrafficLight* lightUpdate = new TrafficLight();
+	lightUpdate->trafficUpDate();
 }
 
 void Intersection::setIntersectionID(int ID)
 {
-
+	intersectionID = ID;
 }
 
 void Intersection::setxCenterPoint(int point)
 {
-
+	xCenterPoint = point;
 }
 
 void Intersection::setyCenterPoint(int point)
 {
-
+	yCenterPoint = point;
 }
 
-void Intersection::setNameNS(string name)
+void Intersection::setxIntersectCoord(double x)
 {
-
+	xIntersectCoord = x;
 }
 
-void Intersection::setNameEW(string name)
+void Intersection::setyIntersectCoord(double y)
 {
+	yIntersectCoord = y;
+}
 
+void Intersection::setNumLanesNS(int num)
+{
+	NumLanesNS = num;
+}
+
+void Intersection::setNumLanesEW(int num)
+{
+	NumLanesEW = num;
+}
+
+void Intersection::setNameNS(char *name)
+{
+	strcpy(nameNS, name);
+}
+
+void Intersection::setNameEW(char *name)
+{
+	strcpy(nameEW, name);
 }
 
 int Intersection::getIntersectionID()
 {
-	return 0;
+	return intersectionID;
 }
 
 int Intersection::getxCenterPoint()
 {
-	return 0;
+	return xCenterPoint;
 }
 
 int Intersection::getyCenterPoint()
 {
-	return 0;
+	return yCenterPoint;
 }
 
-string Intersection::getNameNS()
+double Intersection::getxIntersectCoord()
 {
-	return string();
+	return xIntersectCoord;
 }
 
-string Intersection::getNameEW()
+double Intersection::getyIntersectCoord()
 {
-	return string();
+	return yIntersectCoord;
+}
+
+int Intersection::getNumLanesNS()
+{
+	return NumLanesNS;
+}
+
+int Intersection::getNumLanesEW()
+{
+	return NumLanesEW;
+}
+
+char* Intersection::getNameNS()
+{
+	return nameNS;
+}
+
+char* Intersection::getNameEW()
+{
+	return nameEW;
 }
