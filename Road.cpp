@@ -15,7 +15,7 @@ Road::~Road()
 
 }
 
-bool Road::isPointOnRoad()
+bool Road::isPointOnRoad(double xCoord, double yCoord)
 {
 	double xUpperLeft;
 	double yUpperLeft;
@@ -25,27 +25,17 @@ bool Road::isPointOnRoad()
 	vector<Road*>::iterator it;
 	Map *vec;
 	
-	for (it = vec->roadCollection.begin(); it <= vec->roadCollection.end(); it++)
+	for (it = vec->rCollect.begin(); it <= vec->rCollect.end(); it++)
 	{
-		getxRoadStart();
-		getyRoadStart();
-		getxRoadEnd();
-		getyRoadEnd();
-		getxCoord();
-		getyCoord();
-		getLaneNumber();
-		getDirectionNS();
-		getDirectionEW();
-
 		if (directionNS = true)
 		{ 
 			// For North-South
-			xUpperLeft = getxRoadStart() - ((getLaneNumber() / 2) * 3.6);
-			yUpperLeft = getyRoadStart();
-			xLowerRight = getxRoadEnd() + ((getLaneNumber() / 2) * 3.6);
-			yLowerRight = getyRoadEnd();
+			xUpperLeft = xStartPoint - ((laneNumber / 2) * 3.6);
+			yUpperLeft = yStartPoint;
+			xLowerRight = xEndPoint + ((laneNumber / 2) * 3.6);
+			yLowerRight = yEndPoint;
 
-			if ((getxCoord() >= xUpperLeft) && (getxCoord() <= xLowerRight) && (getyCoord() >= yUpperLeft) && (getyCoord() <= yLowerRight))
+			if ((xCoord >= xUpperLeft) && (xCoord <= xLowerRight) && (yCoord >= yUpperLeft) && (yCoord <= yLowerRight))
 			{
 				return true;
 			}
@@ -55,12 +45,12 @@ bool Road::isPointOnRoad()
 		else if (directionEW = true)
 		{
 			// For East-West
-			xUpperLeft = getxRoadStart();
-			yUpperLeft = getyRoadStart() - ((getLaneNumber() / 2) * 3.6);
-			xLowerRight = getyRoadEnd();
-			yLowerRight = getyRoadEnd() - ((getLaneNumber() / 2) * 3.6);
+			xUpperLeft = xStartPoint;
+			yUpperLeft = yStartPoint - ((laneNumber / 2) * 3.6);
+			xLowerRight = xEndPoint;
+			yLowerRight = yEndPoint - ((laneNumber / 2) * 3.6);
 
-			if ((getxCoord() >= xUpperLeft) && (getxCoord() <= xLowerRight) && (getyCoord() >= yUpperLeft) && (getyCoord() <= yLowerRight))
+			if ((xCoord >= xUpperLeft) && (xCoord <= xLowerRight) && (yCoord >= yUpperLeft) && (yCoord <= yLowerRight))
 			{
 				return true;
 			}
@@ -90,12 +80,12 @@ bool Road::getDirectionEW()
 	return directionEW;
 }
 
-void Road::setRoadName(string name)
+void Road::setRoadName(char *name)
 {
-	roadName = name;
+	strcpy(roadName, name);
 }
 
-string Road::getRoadName()
+char * Road::getRoadName()
 {
 	return roadName;
 }
