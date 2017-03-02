@@ -1,47 +1,48 @@
 #ifndef VEHICLE_H_
 #define VEHICLE_H_
 
-#include <string>
+
 
 class Vehicle
 {
 	private:
-		string type;
+		char type[64];
 		int carID;
-		double xIntersectStartPoint;
-		double yIntersectStartPoint;
-		int intersectStartDirection;
-		double intersectAcceleration;
-		double intersectSpeed;
-		double xintersectLocation;
-		double yintersectLocation;
+		double xVehicleStartPoint;
+		double yVehicleStartPoint;
+		int startDirection;
+		double Acceleration;
+		double speedMPH;
+		double speedMPS;
+		double xVehicleLocation;
+		double yVehicleLocation;
 
 	public:
 		void Move();
 		void PrintReport();
-
-		void setType(string name);
+		void setVehicleSpeed(double mps, double mph);
+		void setType(char *name);
 		void setCarID(int ID);
-		string getType();
+		char * getType();
 		int getCarID();
 
-		void setxIntersectStartPoint(double start);
-		void setyIntersectStartPoint(double start);
-		void setIntersectStartDirection(int start);
-		void setIntersectAcceleration(double acceleration);
-		void setIntersectSpeed(double speed);
-		void setxIntersectLocation(double location);
-		void setyIntersectLocation(double location);
+		void setxVehicleStartPoint(double start);
+		void setyVehicleStartPoint(double start);
+		void setStartDirection(int start);
+		void setAcceleration(double acceleration);
+		void setSpeedMPS(double speed);
+		void setSpeedMPH(double speed);
+		void setxVehicleLocation(double location);
+		void setyVehicleLocation(double location);
 
-		double getxIntersectionStartPoint();
-		double getyIntersectionStartPoint();
-		int getIntersectStartDirection();
-		double getIntersectAcceleration();
-		double getIntersectSpeed();
-		double getxIntersectLocation();
-		double getyIntersectLocation();
+		double getSpeedMPS();
+		double getSpeedMPH();
+		double getxVehicleStartPoint();
+		double getyVehicleStartPoint();
+		int getStartDirection();
+		double getAcceleration();
+		double getSpeed();
+		double getxVehicleLocation();
+		double getyVehicleLocation();
 
 };
-
-
-#endif
