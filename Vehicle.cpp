@@ -1,4 +1,4 @@
-#include "Vehicle.h"
+#include "includes.h"
 
 using namespace std;
 
@@ -12,9 +12,14 @@ void Vehicle::PrintReport()
 
 }
 
-void Vehicle::setType(string name)
+void Vehicle::setVehicleSpeed(double mps, double mph)
 {
-	type = name;
+
+}
+
+void Vehicle::setType(char * name)
+{
+	strcpy(type, name);
 }
 
 void Vehicle::setCarID(int ID)
@@ -22,7 +27,7 @@ void Vehicle::setCarID(int ID)
 	carID = ID;
 }
 
-string Vehicle::getType()
+char *Vehicle::getType()
 {
 	return type;
 }
@@ -32,72 +37,87 @@ int Vehicle::getCarID()
 	return carID;
 }
 
-void Vehicle::setxIntersectStartPoint(double start)
+void Vehicle::setxVehicleStartPoint(double start)
 {
-	xIntersectStartPoint = start;
+	xVehicleStartPoint = start;
 }
 
-void Vehicle::setyIntersectStartPoint(double start)
+void Vehicle::setyVehicleStartPoint(double start)
 {
-	yIntersectStartPoint = start;
+	yVehicleStartPoint = start;
 }
 
-void Vehicle::setIntersectStartDirection(int start)
+void Vehicle::setStartDirection(int start)
 {
-	intersectStartDirection = start;
+	startDirection = start;
 }
 
-void Vehicle::setIntersectAcceleration(double acceleration)
+void Vehicle::setAcceleration(double inputAcceleration)
 {
-	intersectAcceleration = acceleration;
+	Acceleration = inputAcceleration;
 }
 
-void Vehicle::setIntersectSpeed(double speed)
+void Vehicle::setSpeedMPS(double speed)
 {
-	intersectSpeed = speed;
 }
 
-void Vehicle::setxIntersectLocation(double location)
+void Vehicle::setSpeedMPH(double speed)
 {
-	xIntersectLocation = location;
+	speedMPH = speed;
 }
 
-void Vehicle::setyIntersectLocation(double location)
+void Vehicle::setSpeedMPS(double speed)
 {
-	yIntersectLocation = location;
+	speedMPS = speed;
 }
 
-double Vehicle::getxIntersectionStartPoint()
+void Vehicle::setxVehicleLocation(double location)
 {
-	return xIntersectStartPoint;
+	xVehicleLocation = location;
 }
 
-double Vehicle::getyIntersectionStartPoint()
+void Vehicle::setyVehicleLocation(double location)
 {
-	return yIntersectStartPoint;
+	yVehicleLocation = location;
 }
 
-int Vehicle::getIntersectStartDirection()
+double Vehicle::getSpeedMPS()
 {
-	return intersectStartDirection;
+	return speedMPS;
 }
 
-double Vehicle::getIntersectAcceleration()
+double Vehicle::getSpeedMPH()
 {
-	return intersectAcceleration;
+	return speedMPH;
 }
 
-double Vehicle::getIntersectSpeed()
+double Vehicle::getxVehicleStartPoint()
 {
-	return intersectSpeed;
+	return xVehicleStartPoint;
 }
 
-double Vehicle::getxIntersectLocation()
+double Vehicle::getyVehicleStartPoint()
 {
-	return xIntersectLocation;
+	return yVehicleStartPoint;
 }
 
-double Vehicle::getyIntersectLocation()
+int Vehicle::getStartDirection()
 {
-	return yIntersectLocation;
+	return startDirection;
 }
+
+double Vehicle::getAcceleration()
+{
+	return Acceleration;
+}
+
+double Vehicle::getxVehicleLocation()
+{
+	return xVehicleLocation;
+}
+
+double Vehicle::getyVehicleLocation()
+{
+	return yVehicleLocation;
+}
+
