@@ -2,9 +2,44 @@
 
 using namespace std;
 
-void Vehicle::Move()
+void Vehicle::Move(Road *roadInst, Intersetion *intersectInst)
 {
+	// Adjusted x and y locations as the vehicle is moving
+	double newX = 0;
+	double newY = 0;
 
+	double laneWidth = 36.6;
+	double BD = ((roadInst->getLaneNumber()) == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+	double distToCenter = intersectInst->getxCenterPoint() - xVehicleLocation;
+	double distAfterTurn = speedMPS - distToCenter - BD;
+
+	// If direction is East
+	if (direction == 0.0)
+	{
+		newX = xVehicleLocation + speedMPS;
+		newY = yVehicleLocation;
+	}
+
+	// If direction is North
+	else if (direction == 90.0)
+	{
+		newX = xVehicleLocation;
+		newY = yVehicleLocation - speedMPS;
+	}
+
+	// If direction is West
+	else if (direction == 180.0)
+	{
+		newX = xVehicleLocation - speedMPS;
+		newY = yVehicleLocation;
+	}
+
+	// If direction is North
+	else if (direction == 270.0)
+	{
+		newX = xVehicleLocation;
+		newY = yVehicleLocation + speedMPS;
+	}
 }
 
 void Vehicle::PrintReport()
@@ -12,7 +47,7 @@ void Vehicle::PrintReport()
 
 }
 
-void Vehicle::setVehicleSpeed(double mps, double mph)
+void Vehicle::updateVehicleSpeed(double mps, double mph)
 {
 	double laneWidth = 36.6;
 	double BC = ((roadInst->getLaneNumber()) == 4) ? (laneWidth * 2.0) : (laneWidth * 1.0);
