@@ -7,12 +7,25 @@ using namespace std;
 
 Road::Road()
 {
-
+	roadName = NULL;
+	directionNS = false;
+	directionEW = false;
+	xStartPoint = 0.0;
+	yStartPoint = 0.0;
+    	xEndPoint = 0.0;
+	yEndPoint = 0.0;
+	xCoord = 0.0;
+	yCoord = 0.0;
+	laneNumber = 0;
+	startIntersection = 0;
+	endIntersection = 0;
+	speedLimitMPS = 0.0;
+	speedLimitMPH = 0.0;
 }
 
 Road::~Road()
 {
-
+	delete[] roadName;
 }
 
 bool Road::isPointOnRoad(double xCoord, double yCoord)
