@@ -4,6 +4,27 @@
 
 using namespace std;
 
+Intersection::Intersection()
+{
+	intersectionID = 0;
+	xCenterPoint = 0.0;
+	yCenterPoint = 0.0;
+	xIntersectCoord = 0.0;
+	yIntersectCoord = 0.0;
+	NumLanesNS = 0;
+	NumLanesEW = 0;
+	nameN = NULL;
+	nameS = NULL;
+	nameE = NULL;
+	nameW = NULL;
+	curRoad = NULL;
+}
+
+Intersection::~Intersection()
+{
+
+}
+
 bool Intersection::isPointInIntersection()
 {
 	Road *road = new Road();
