@@ -22,7 +22,11 @@ Intersection::Intersection()
 
 Intersection::~Intersection()
 {
-
+	delete[] nameN;
+	delete[] nameS;
+	delete[] nameE;
+	delete[] nameW;
+	delete[] curRoad;
 }
 
 bool Intersection::isPointInIntersection()
