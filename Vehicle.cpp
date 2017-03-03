@@ -12,6 +12,13 @@ void Vehicle::Move(Road *roadInst, Intersetion *intersectInst)
 	double BD = ((roadInst->getLaneNumber()) == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
 	double distToCenter = intersectInst->getxCenterPoint() - xVehicleLocation;
 	double distAfterTurn = speedMPS - distToCenter - BD;
+	double newXIfTurn = intersectInst->getxCenterPoint() - distAfterTurn;
+	double newYIfTurn = yVehicleLocation + distAfterTurn;
+
+	bool turnDecided = false;
+	Intersection *nextIntersection = new Intersection();
+	Intersection *curIntersection = new Intersection();
+	Map *mapInst = new Map();
 
 	// If direction is East
 	if (direction == 0.0)
@@ -39,6 +46,102 @@ void Vehicle::Move(Road *roadInst, Intersetion *intersectInst)
 	{
 		newX = xVehicleLocation;
 		newY = yVehicleLocation + speedMPS;
+	}
+
+	else
+	{
+		cout << "Something is wrong (first set of if statements, Move() function. We should not be here." << endl;
+	}
+
+	char name[64];
+	strcpy(name, roadInst->getRoadName());
+
+	if (name == NULL)
+	{
+		if (direction == 0.0)
+		{
+			xVehicleLocation = xVehicleLocation + laneWidth * 2.0;
+		}
+
+		else if (direction = 90.0)
+		{
+			yVehicleLocation = yVehicleLocation - laneWidth * 2.0;
+		}
+
+		else if (direction = 180.0)
+		{
+			xVehicleLocation = xVehicleLocation - laneWidth * 2.0;
+		}
+
+		else if (direction = 270.0)
+		{
+			yVehicleLocation = yVehicleLocation + laneWidth * 2.0;
+		}
+		
+		else
+		{
+			cout << "Something is wrong (second set of if statements, Move() function). We should not be here." << endl;
+		}
+
+		strcpy(name, roadInst->getRoadName());
+
+		if (name == NULL)
+		{
+			cout << "This program is not working. Terminate." << endl;
+			throw std::exception();
+		}
+
+		else
+		{
+			cout << "Everything might be fine." << endl;
+		}
+	}
+
+	nextIntersection = mapInst->getNextIntersection(xVehicleLocation, yVehicleLocation, direction, intersectInst);
+
+	if (nextIntersection == NULL)
+	{
+		curIntersection = mapInst->getIntersection(intersectInst->getIntersectionID());
+		intersectInst->getxCenterPoint();
+		intersectInst->getyCenterPoint();
+
+		if (direction == 0.0)
+		{
+			if (turnDirection == LEFT)
+			{
+				
+			}
+		}
+	}
+
+	roadInst->getSpeedLimitMPH();
+	roadInst->getSpeedLimitMPS();
+
+	if (turnDecided == false)
+	{
+		// Decide turn at next intersection
+		// set turnDecided to true
+	}
+
+	// If direction is North/South, get state of light
+	if (direction == 90.0 || direction == 270.0)
+	{
+		lightInst->getNSState();
+	}
+
+	// If direction is East/West, get state of light
+	else if (direction == 0.0 || direction == 180.0)
+	{
+		lightInst->getEWState();
+	}
+
+	updateVehicleSpeed(speedMPS, speedMPH, roadInst, intersectInst, lightInst);
+	nextIntersection->getxCenterPoint();
+	nextIntersection->getyCenterPoint();
+
+	if (direction == 0.0)
+	{
+		// Sigh
 	}
 }
 
