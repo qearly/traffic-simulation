@@ -6,7 +6,7 @@ using namespace std;
 Map::Map(TrafficSimDataParser *dp)
 {
 	// Collection of Roads
-	int rCount = dp->getRoadCount();
+	Road *road = NULL;
 	char roadName[64];
 	double xStart;
 	double yStart;
@@ -17,13 +17,25 @@ Map::Map(TrafficSimDataParser *dp)
 	double speedLimit;
 	int numLanes;
 
-	for (int i = 0; i <= rCount; i++)
+	for (int i = 0; i < rCollect.size(); i++)
 	{ 
 		dp->getRoadData(roadName, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes);
+
+		road->setRoadName(roadName);
+		road->setxRoadStart(xStart);
+		road->setyRoadStart(yStart);
+		road->setxRoadEnd(xEnd);
+		road->setyRoadEnd(yEnd);
+		road->setStartIntersection(intersectStart);
+		road->setEndIntersection(intersectEnd);
+		road->setSpeedLimitMPH(speedLimit);
+		road->setLaneNumber(numLanes);
+
+		rCollect.push_back(road);
 	}
 
 	// Collection of Intersections
-	int iCount = dp->getIntersectionCount();
+	Intersection *intersect = NULL;
 	int ID;
 	double xPosition;
 	double yPosition;
@@ -32,9 +44,19 @@ Map::Map(TrafficSimDataParser *dp)
 	char nameS[32];
 	char nameW[32];
 
-	for (int j = 0; j <= iCount; j++)
+	for (int j = 0; j < iCollect.size(); j++)
 	{
 		dp->getIntersectionData(&ID, &xPosition, &yPosition, nameN, nameE, nameS, nameW);
+		
+		intersect->setIntersectionID(ID);
+		intersect->setxIntersectCoord(xPosition);
+		intersect->setyIntersectCoord(yPosition);
+		intersect->setNameN(nameN);
+		intersect->setNameE(nameE);
+		intersect->setNameS(nameS);
+		intersect->setNameW(nameW);
+
+		iCollect.push_back(intersect);
 	}
 }
 
