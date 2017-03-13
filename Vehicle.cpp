@@ -101,15 +101,65 @@ void Vehicle::Move(Road *roadInst, Intersetion *intersectInst)
 
 	if (nextIntersection == NULL)
 	{
-		curIntersection = mapInst->getIntersection(intersectInst->getIntersectionID());
-		intersectInst->getxCenterPoint();
-		intersectInst->getyCenterPoint();
+		curIntersection = mapInst->getIntersection(intersectID);
+		intersection->getxCenterPoint();
+		intersection->getyCenterPoint();
 
 		if (direction == 0.0)
 		{
 			if (turnDirection == LEFT)
 			{
-				
+				Road *tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				int numberOfLanesNS = tempRoad->getLaneNumber();
+				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				int numberOfLanesEW = tempRoad->getLaneNumber();
+
+				newX = xVehicleLocation + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				newY = yVehicleLocation + (numberOfLanesEW / 2) * laneWidth;
+
+				direction = 90.0;
+			}
+
+			else if (turnDirection == RIGHT)
+			{
+				Road *tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				int numberOfLanesNS = tempRoad->getLaneNumber();
+				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				int numberOfLanesEW = tempRoad->getLaneNumber();
+
+				newX = xVehicleLocation + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				newY = yVehicleLocation + (numberOfLanesEW / 2) * laneWidth;
+
+				direction = 270.0;
+			}
+		}
+
+		else if (direction == 90.0)
+		{
+			if (turnDirection == LEFT)
+			{
+				Road *tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				int numberOfLanesEW = tempRoad->getLaneNumber();
+				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				int numberOfLanesNS = tempRoad->getLaneNumber();
+
+				newX = xVehicleLocation + ((numberOfLanesEW == 2) ? 0.5 : 1.5) * laneWidth;
+				newY = yVehicleLocation + (numberOfLanesNS / 2) * laneWidth;
+
+				direction = 0.0;
+			}
+
+			else if (turnDirection == RIGHT)
+			{
+				Road *tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				int numberOfLanesEW = tempRoad->getLaneNumber();
+				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				int numberOfLanesNS = tempRoad->getLaneNumber();
+
+				newX = xVehicleLocation + ((numberOfLanesEW == 2) ? 0.5 : 1.5) * laneWidth;
+				newY = yVehicleLocation + (numberOfLanesNS / 2) * laneWidth;
+
+				direction = 170.0;
 			}
 		}
 	}
