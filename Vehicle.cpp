@@ -686,3 +686,63 @@ double Vehicle::getyVehicleLocation()
 {
 	return yVehicleLocation;
 }
+
+
+
+
+// Testing new stuff
+
+void Vehicle::Move()
+{
+	
+
+// I am doing it this way because it makes sure the vehicle data 
+// will not be reinitialized each time the move function is called
+if (counter < 1)
+{ 
+	dp = new TrafficSimDataParser("TrafficSim01.xml");
+	road = new Road();
+	intersection = new Intersection();
+	nextIntersection = new Intersection();
+	if(dp->getVehicleData(type, &carID, &xVehicleLocation, &yVehicleLocation, &direction, &Acceleration))
+	{
+		setType(type);
+		setCarID(carID);
+		setxVehicleLocation(xVehicleLocation);
+		setyVehicleLocation(yVehicleLocation);
+		setDirection(direction);
+		setAcceleration(Acceleration);
+	}
+
+	// Local variables needed to get the initial road and intersection
+	char roadName[64];
+	double xStart;
+	double yStart;
+	double xEnd;
+	double yEnd;
+	int intersectStart;
+	int intersectEnd;
+	double speedLimit;
+	int numLanes;
+	int intersectID;
+	double xPosition;
+	double yPosition;
+	char nameN[32];
+	char nameE[32];
+	char nameS[32];
+	char nameW[32];
+
+	Map *map = new Map(dp);
+	dp->getRoadData(roadName, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes);
+	dp->getIntersectionData(&intersectID, &xPosition, &yPosition, nameN, nameE, nameS, nameW);
+
+	road->setRoadData(roadName, xStart, yStart, xEnd, yEnd, intersectStart, intersectEnd, speedLimit, numLanes);
+	intersection->setIntersectionData(intersectID, xPosition, yPosition, nameN, nameE, nameS, nameW);
+
+	road = map->getRoad(road->getRoadName());
+	intersection = map->getIntersection(intersectID);
+
+	counter++;
+}
+	// Adjusted x and y locations as the vehicle is moving
+
