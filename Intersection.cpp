@@ -1,6 +1,11 @@
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
 #include "Intersection.h"
 #include "Road.h"
 #include "TrafficLight.h"
+#include "TrafficSimDataParser.h"
 
 using namespace std;
 
@@ -13,30 +18,22 @@ Intersection::Intersection()
 	yIntersectCoord = 0.0;
 	NumLanesNS = 0;
 	NumLanesEW = 0;
-	nameN = NULL;
-	nameS = NULL;
-	nameE = NULL;
-	nameW = NULL;
-	curRoad = NULL;
 }
 
 Intersection::~Intersection()
 {
-	delete[] nameN;
-	delete[] nameS;
-	delete[] nameE;
-	delete[] nameW;
-	delete[] curRoad;
+
 }
 
-bool Intersection::isPointInIntersection()
+bool Intersection::isPointInIntersection(double xCenterPoint, double yCenterPoint)
 {
-	Road *road = new Road();
+	Road *rInst = new Road();
+	double laneWidth = 36.6;
 
-	double xUpperLeft = xCenterPoint - (road->getLaneNumber() / 2 * 36.6);
-	double yUpperLeft = yCenterPoint - (road->getLaneNumber() / 2 * 36.6);
-	double xLowerRight = xCenterPoint + (road->getLaneNumber() / 2 * 36.6);
-	double yLowerRight = yCenterPoint + (road->getLaneNumber() / 2 * 36.6);
+	double xUpperLeft = xCenterPoint - (rInst->getLaneNumber() / 2 * laneWidth);
+	double yUpperLeft = yCenterPoint - (rInst->getLaneNumber() / 2 * laneWidth);
+	double xLowerRight = xCenterPoint + (rInst->getLaneNumber() / 2 * laneWidth);
+	double yLowerRight = yCenterPoint + (rInst->getLaneNumber() / 2 * laneWidth);
 
 	if ((xCenterPoint >= xUpperLeft) && (xCenterPoint <= xLowerRight) && (yCenterPoint >= yUpperLeft) && (yCenterPoint <= yLowerRight))
 	{
@@ -49,10 +46,12 @@ bool Intersection::isPointInIntersection()
 	}
 }
 
-void Intersection::upDate()
+// No need to loop through intersection because the lights
+// at each intersection are synced
+void Intersection::intersectUpDate(TrafficLight *light)
 {
-	TrafficLight* lightUpdate = new TrafficLight();
-	lightUpdate->trafficUpDate();
+	light->NSLightUpDate();
+	light->EWLightUpDate();
 }
 
 void Intersection::setIntersectionID(int ID)
@@ -60,12 +59,12 @@ void Intersection::setIntersectionID(int ID)
 	intersectionID = ID;
 }
 
-void Intersection::setxCenterPoint(int point)
+void Intersection::setxCenterPoint(double point)
 {
 	xCenterPoint = point;
 }
 
-void Intersection::setyCenterPoint(int point)
+void Intersection::setyCenterPoint(double point)
 {
 	yCenterPoint = point;
 }
@@ -90,14 +89,40 @@ void Intersection::setNumLanesEW(int num)
 	NumLanesEW = num;
 }
 
-void Intersection::setNameNS(char *name)
+void Intersection::setNameN(char * name)
 {
-	strcpy(nameNS, name);
+	strcpy(nameN, name);
 }
 
-void Intersection::setNameEW(char *name)
+void Intersection::setNameS(char * name)
 {
-	strcpy(nameEW, name);
+	strcpy(nameS, name);
+}
+
+void Intersection::setNameE(char * name)
+{
+	strcpy(nameE, name);
+}
+
+void Intersection::setNameW(char * name)
+{
+	strcpy(nameW, name);
+}
+
+void Intersection::setCurRoad(char * road)
+{
+	strcpy(curRoad, road);
+}
+
+void Intersection::setIntersectionData(int intersectID, double xPosition, double yPosition, char * north, char * east, char * south, char * west)
+{
+	intersectionID = intersectID;
+	xCenterPoint = xPosition;
+	yCenterPoint = yPosition;
+	strcpy(nameN, north);
+	strcpy(nameE, east);
+	strcpy(nameS, south);
+	strcpy(nameW, west);
 }
 
 int Intersection::getIntersectionID()
@@ -105,12 +130,12 @@ int Intersection::getIntersectionID()
 	return intersectionID;
 }
 
-int Intersection::getxCenterPoint()
+double Intersection::getxCenterPoint()
 {
 	return xCenterPoint;
 }
 
-int Intersection::getyCenterPoint()
+double Intersection::getyCenterPoint()
 {
 	return yCenterPoint;
 }
@@ -135,12 +160,27 @@ int Intersection::getNumLanesEW()
 	return NumLanesEW;
 }
 
-char* Intersection::getNameNS()
+char * Intersection::getNameN()
 {
-	return nameNS;
+	return nameN;
 }
 
-char* Intersection::getNameEW()
+char * Intersection::getNameS()
 {
-	return nameEW;
+	return nameS;
+}
+
+char * Intersection::getNameE()
+{
+	return nameE;
+}
+
+char * Intersection::getNameW()
+{
+	return nameW;
+}
+
+char * Intersection::getCurRoad()
+{
+	return curRoad;
 }
