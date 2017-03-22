@@ -1,3 +1,7 @@
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
 #include "Road.h"
 #include "Map.h"
 #include "TrafficSimDataParser.h"
@@ -7,15 +11,10 @@ using namespace std;
 
 Road::Road()
 {
-	roadName = NULL;
-	directionNS = false;
-	directionEW = false;
 	xStartPoint = 0.0;
 	yStartPoint = 0.0;
-    	xEndPoint = 0.0;
+    xEndPoint = 0.0;
 	yEndPoint = 0.0;
-	xCoord = 0.0;
-	yCoord = 0.0;
 	laneNumber = 0;
 	startIntersection = 0;
 	endIntersection = 0;
@@ -25,22 +24,26 @@ Road::Road()
 
 Road::~Road()
 {
-	delete[] roadName;
+
 }
 
-bool Road::isPointOnRoad(double xCoord, double yCoord)
+// Returns true if the x and y values passed in are on instance of Road
+bool Road::isPointOnRoad(double xCoord, double yCoord, double direction, char *filename)
 {
 	double xUpperLeft;
 	double yUpperLeft;
 	double xLowerRight;
 	double yLowerRight;
+	TrafficSimDataParser *dp = new TrafficSimDataParser(filename);
+	int numberRoads = dp->getRoadCount();
 
-	vector<Road*>::iterator it;
-	Map *vec;
+	int intersectID = 0;
+	Map *vec = new Map(filename);
 	
-	for (it = vec->rCollect.begin(); it <= vec->rCollect.end(); it++)
+	for (int i = 0; i < numberRoads; i++)
 	{
-		if (directionNS = true)
+	
+		if ((direction == 0.0) || (direction == 180.0))
 		{ 
 			// For North-South
 			xUpperLeft = xStartPoint - ((laneNumber / 2) * 3.6);
@@ -53,9 +56,14 @@ bool Road::isPointOnRoad(double xCoord, double yCoord)
 				return true;
 			}
 
+			else
+			{
+				return false;
+			}
+
 		}
 
-		else if (directionEW = true)
+		else if ((direction == 90.0) || (direction == 270.0))
 		{
 			// For East-West
 			xUpperLeft = xStartPoint;
@@ -67,30 +75,16 @@ bool Road::isPointOnRoad(double xCoord, double yCoord)
 			{
 				return true;
 			}
+
+			else
+
+			{
+				return false;
+			}
 		}
 	}
 
-	
-}
-
-void Road::setDirectionNS(bool value)
-{
-	directionNS = value;
-}
-
-void Road::setDirectionEW(bool value)
-{
-	directionEW = value;
-}
-
-bool Road::getDirectionNS()
-{
-	return directionNS;
-}
-
-bool Road::getDirectionEW()
-{
-	return directionEW;
+	return true;
 }
 
 void Road::setRoadName(char *name)
@@ -138,14 +132,18 @@ void Road::setyRoadEnd(double endingPoint)
 	yEndPoint = endingPoint;
 }
 
-double Road::getyRoadEnd()
-{
-	return yEndPoint;
-}
-
 void Road::setLaneNumber(int lane)
 {
 	laneNumber = lane;
+}
+
+void Road::setLaneNumberEW(int lane)
+{
+}
+
+double Road::getyRoadEnd()
+{
+	return yEndPoint;
 }
 
 int Road::getLaneNumber()
@@ -168,37 +166,51 @@ void Road::setEndIntersection(int endingPoint)
 	endIntersection = endingPoint;
 }
 
+void Road::setSpeedLimitMPH(double limit)
+{
+	speedLimitMPH = limit;
+}
+
 int Road::getEndIntersection()
 {
 	return endIntersection;
 }
 
-void Road::setSpeedLimit(int limit)
+void Road::setSpeedLimitMPS(double limit)
 {
-	speedLimit = limit;
+	speedLimitMPS = limit;
 }
 
-void Road::setxCoord(double x)
+void Road::setDirection(double dir)
 {
-	xCoord = x;
+	direction = dir;
 }
 
-void Road::setyCoord(double y)
+void Road::setRoadData(char * name, double xStart, double yStart, double xEnd, double yEnd, int intersectStart, int intersectEnd, double speedLimit, int numLanes)
 {
-	yCoord = y;
+	strcpy(roadName, name);
+
+	xStartPoint = xStart;
+	yStartPoint = yStart;
+	xEndPoint = xEnd;
+	yEndPoint = yEnd;
+	startIntersection = intersectStart;
+	endIntersection = intersectEnd;
+	speedLimitMPH = speedLimit;
+	laneNumber = numLanes;
 }
 
-int Road::getSpeedLimit()
+double Road::getSpeedLimitMPS()
 {
-	return speedLimit;
+	return speedLimitMPS;
 }
 
-double Road::getxCoord()
+double Road::getSpeedLimitMPH()
 {
-	return xCoord;
+	return speedLimitMPH;
 }
 
-double Road::getyCoord()
+double Road::getDirection()
 {
-	return yCoord;
+	return direction;
 }
