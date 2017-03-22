@@ -1,62 +1,72 @@
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
 #include "Map.h"
+#include "Intersection.h"
 
 using namespace std;
 
-
-Map::Map(TrafficSimDataParser *dp)
+Map::Map(char *filename)
 {
-	// Collection of Roads
-	Road *road = NULL;
-	char roadName[64];
-	double xStart;
-	double yStart;
-	double xEnd;
-	double yEnd;
-	int intersectStart;
-	int intersectEnd;
-	double speedLimit;
-	int numLanes;
+	TrafficSimDataParser *dp = new TrafficSimDataParser(filename);
 
-	for (int i = 0; i < rCollect.size(); i++)
-	{ 
-		dp->getRoadData(roadName, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes);
+	for (int i = 0; i < dp->getRoadCount(); i++)
+	{
+		Road *road = new Road();
 
-		road->setRoadName(roadName);
-		road->setxRoadStart(xStart);
-		road->setyRoadStart(yStart);
-		road->setxRoadEnd(xEnd);
-		road->setyRoadEnd(yEnd);
-		road->setStartIntersection(intersectStart);
-		road->setEndIntersection(intersectEnd);
-		road->setSpeedLimitMPH(speedLimit);
-		road->setLaneNumber(numLanes);
+		char roadName[64];
+		double xStart;
+		double yStart;
+		double xEnd;
+		double yEnd;
+		int intersectStart;
+		int intersectEnd;
+		double speedLimit;
+		int numLanes;
 
-		rCollect.push_back(road);
+		if (dp->getRoadData(roadName, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes))
+		{
+			road->setRoadName(roadName);
+			road->setxRoadStart(xStart);
+			road->setyRoadStart(yStart);
+			road->setxRoadEnd(xEnd);
+			road->setyRoadEnd(yEnd);
+			road->setStartIntersection(intersectStart);
+			road->setEndIntersection(intersectEnd);
+			road->setSpeedLimitMPH(speedLimit);
+			road->setLaneNumber(numLanes);
+
+			rCollect.push_back(road);
+		}
+	
 	}
 
 	// Collection of Intersections
-	Intersection *intersect = NULL;
-	int ID;
-	double xPosition;
-	double yPosition;
-	char nameN[32];
-	char nameE[32];
-	char nameS[32];
-	char nameW[32];
 
-	for (int j = 0; j < iCollect.size(); j++)
+	for (int i = 0; i < dp->getIntersectionCount(); i++)
 	{
-		dp->getIntersectionData(&ID, &xPosition, &yPosition, nameN, nameE, nameS, nameW);
-		
-		intersect->setIntersectionID(ID);
-		intersect->setxIntersectCoord(xPosition);
-		intersect->setyIntersectCoord(yPosition);
-		intersect->setNameN(nameN);
-		intersect->setNameE(nameE);
-		intersect->setNameS(nameS);
-		intersect->setNameW(nameW);
+		Intersection *intersect = new Intersection();
+		int ID;
+		double xPosition;
+		double yPosition;
+		char nameN[32];
+		char nameE[32];
+		char nameS[32];
+		char nameW[32];
 
-		iCollect.push_back(intersect);
+		if (dp->getIntersectionData(&ID, &xPosition, &yPosition, nameN, nameE, nameS, nameW))
+		{
+			intersect->setIntersectionID(ID);
+			intersect->setxCenterPoint(xPosition);
+			intersect->setyCenterPoint(yPosition);
+			intersect->setNameN(nameN);
+			intersect->setNameE(nameE);
+			intersect->setNameS(nameS);
+			intersect->setNameW(nameW);
+
+			iCollect.push_back(intersect);
+		}
 	}
 }
 
@@ -67,7 +77,7 @@ Map::~Map()
 
 Road * Map::getRoad(char * rdID)
 {
-	for (int i = 0; i < rCollect.size(); i++)
+	for (size_t i = 0; i < rCollect.size(); i++)
 	{
 		if (strcmp(rCollect[i]->getRoadName(), rdID) == 0)
 		{
@@ -75,20 +85,52 @@ Road * Map::getRoad(char * rdID)
 		}
 	}
 
-	return nullptr;
+	Road *road = new Road();
+
+	rCollect.push_back(road);
+
+	return road;
 }
 
 Road * Map::getRoad(double x, double y, double dir)
 {
-	for (int i = 0; i < rCollect.size(); i++)
+	double XU;
+	double YU;
+	double XL;
+	double YL;
+	bool NSRoadFlag;
+
+	for (size_t i = 0; i < rCollect.size(); i++)
 	{
-		if ((rCollect[i]->getxCoord() == x) && (rCollect[i]->getyCoord() == y) && ((rCollect[i]->getDirectionNS() == dir) || rCollect[i]->getDirectionEW() == dir))
+		if ((dir == 0.0) || (dir == 180.0))
+		{
+			XU = rCollect[i]->getxRoadStart();
+			YU = rCollect[i]->getyRoadStart() - (rCollect[i]->getLaneNumber() / 2 * 3.6);
+			XL = rCollect[i]->getxRoadEnd();
+			YL = rCollect[i]->getyRoadEnd() + (rCollect[i]->getLaneNumber() / 2 * 3.6);
+			NSRoadFlag = false;
+		}
+
+		else if ((dir == 90.0) || (dir == 270.0))
+		{
+			XU = rCollect[i]->getxRoadStart() - (rCollect[i]->getLaneNumber() / 2 * 3.6);
+			YU = rCollect[i]->getyRoadStart();
+			XL = rCollect[i]->getxRoadEnd() + (rCollect[i]->getLaneNumber() / 2 * 3.6);
+			YL = rCollect[i]->getyRoadEnd();
+			NSRoadFlag = true;
+		}
+
+		if ((x >= XU) && (x <= XL) && (y >= YU) && (y <= YL))
 		{
 			return rCollect[i];
 		}
 	}
 
-	return nullptr;
+	Road *road = new Road();
+
+	rCollect.push_back(road);
+
+	return road;
 }
 
 void Map::addIntersection(Intersection * i)
@@ -98,57 +140,62 @@ void Map::addIntersection(Intersection * i)
 
 Intersection * Map::getIntersection(int id)
 {
-	for (int i = 0; i < iCollect.size(); i++)
+
+	for (size_t i = 0; i < iCollect.size(); i++)
 	{
-		if (iCollect[i]->getIntersectionID == id)
+		if (iCollect[i]->getIntersectionID() == id)
 		{
 			return  iCollect[i];
 		}
 	}
 
-	return nullptr;
+	Intersection *intersect = new Intersection();
+
+	iCollect.push_back(intersect);
+
+	return intersect;
 }
 
-Intersection * Map::getNextIntersection(double x, double y, double dir)
+Intersection * Map::getNextIntersection(double x, double y, double dir, char *roadName)
 {
-	Intersection *nextInt = new Intersection();
 	bool checkIntersect;
-	double minDist = 65536.999;
+	double minDist = 100000000000;
 	double dist = 0;
-	nextInt = NULL;
+	Intersection *nextInt = NULL;
 
-	for (int i = 0; i < iCollect.size(); i++)
+	for (size_t i = 0; i < iCollect.size(); i++)
 	{
 		checkIntersect = false;
 
-		if ((dir == 0.0) && (iCollect[i]->getNameW == iCollect[i]->getCurRoad) && (x < iCollect[i]->getxCenterPoint))
+		if ((dir == 0.0) && (strcmp(iCollect[i]->getNameW(), roadName) == 0) && (x < iCollect[i]->getxCenterPoint()))
 		{
 			checkIntersect = true;
 		}
 
-		else if ((dir == 90.0) && (iCollect[i]->getNameS == iCollect[i]->getCurRoad) && (y > iCollect[i]->getyCenterPoint))
+		else if ((dir == 90.0) && (strcmp(iCollect[i]->getNameS(), roadName) == 0) && (y > iCollect[i]->getyCenterPoint()))
 		{
 			checkIntersect = true;
 		}
 
-		else if ((dir == 180.0) && (iCollect[i]->getNameE == iCollect[i]->getCurRoad) && (x > iCollect[i]->getxCenterPoint))
+		else if ((dir == 180.0) && (strcmp(iCollect[i]->getNameE(), roadName) == 0) && (x > iCollect[i]->getxCenterPoint()))
 		{
 			checkIntersect = true;
 		}
 
-		else if ((dir == 270.0) && (iCollect[i]->getNameN == iCollect[i]->getCurRoad) && (y < iCollect[i]->getyCenterPoint))
+		else if ((dir == 270.0) && (strcmp(iCollect[i]->getNameN(), roadName) == 0) && (y < iCollect[i]->getyCenterPoint()))
 		{
 			checkIntersect = true;
 		}
 
-		if (checkIntersect = true)
+		if (checkIntersect == true)
 		{
-			dist = sqrt(pow(x - iCollect[i]->getxCenterPoint, 2.0) + pow(y - iCollect[i]->getyCenterPoint, 2.0));
+			dist = sqrt(pow(x - iCollect[i]->getxCenterPoint(), 2.0) + pow(y - iCollect[i]->getyCenterPoint(), 2.0));
 
 			if (dist < minDist)
 			{
 				minDist = dist;
 				nextInt = iCollect[i];
+				return nextInt;
 			}
 		}
 	}
@@ -158,7 +205,7 @@ Intersection * Map::getNextIntersection(double x, double y, double dir)
 
 Intersection * Map::getIntersection(double x, double y)
 {
-	for (int i = 0; i < iCollect.size(); i++)
+	for (size_t i = 0; i < iCollect.size(); i++)
 	{
 		if ((iCollect[i]->getxIntersectCoord() == x) && (iCollect[i]->getyIntersectCoord() == y))
 		{
@@ -169,15 +216,16 @@ Intersection * Map::getIntersection(double x, double y)
 	return nullptr;
 }
 
-void Map::PrintReport()
+void Map::PrintStatus()
 {
 
 }
 
 void Map::upDate(double time)
 {
-	for (int i = 0; i < iCollect.size(); i++)
+	TrafficLight *light = new TrafficLight();
+	for (size_t i = 0; i < iCollect.size(); i++)
 	{
-		iCollect[i]->intersectUpDate();
+		iCollect[i]->intersectUpDate(light);
 	}
 }
