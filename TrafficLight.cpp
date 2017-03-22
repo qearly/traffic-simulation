@@ -1,175 +1,96 @@
-#include "TrafficLight.h"
-#include <sys/types.h>     
-#include <sys/timeb.h>     
-#include <time.h>   
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
+#include "TrafficLight.h"  
 #include <iostream>      
 
 using namespace std;
 
-void TrafficLight::trafficUpDate()
+void TrafficLight::NSLightUpDate()
 {
-	thisTime = 0;
-	outputTime = 0;
-
-	if (getNSState() == NULL)
-	{
-		setNSState(GREEN);
-	}
 	
-	if (getEWState() == NULL)
+	if (counter > 100)
 	{
-		setEWState(RED);
+		counter = 0;
 	}
 
 
-	// Starting the NS timer. We'll see if this works.
-	_ftime(&tStruct);
-	thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0); 
-	outputTime = thisTime + 5.0; 
-
-	if (getNSState() == GREEN)
+	if (counter <= 100)  
 	{
-		while (outputTime <= 45)
-		{
-			_ftime(&tStruct);
-			thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0); 
+			counter += 1;
 
-			if (thisTime >= outputTime)
+			if (counter <= 50)
 			{
-				outputTime += 5.0;
-				cout << "The current state of NS light is Green." << endl;
+				setNSState(RED);
 			}
-		}
 
-		outputTime = 0;
-		setNSState(YELLOW);
+			else if ((counter > 50) && (counter <= 95))
+			{
+				setNSState(GREEN);
+			}
+
+			else if ((counter > 95) && (counter <= 100))
+			{
+				setNSState(YELLOW);
+			}
+
+		
 	}
 
-	else if (getNSState() == YELLOW)
+}
+
+void TrafficLight::EWLightUpDate()
+{
+
+	if (counterEW > 100)
 	{
-		while (outputTime <= 5)
-		{
-			_ftime(&tStruct);
-			thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0);
-
-			if (thisTime >= outputTime)
-			{
-				outputTime += 5.0;
-				cout << "The current state of NS light is Yellow." << endl;
-			}
-		}
-
-		outputTime = 0;
-		setNSState(RED);
+		counterEW = 0;
 	}
 
-	else if (getNSState() == RED)
+
+	if (counterEW <= 100)
 	{
-		while (outputTime <= 50)
-		{
-			_ftime(&tStruct);
-			thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0);
-
-			if (thisTime >= outputTime)
+	
+			counterEW += 1;
+		
+			if (counterEW <= 45)
 			{
-				outputTime += 5.0;
-				cout << "The current state of NS light is Red." << endl;
+				setEWState(GREEN);
+
 			}
-		}
 
-		outputTime = 0;
-		setNSState(GREEN);
-	}
-	// End the NS timer
-
-
-	// Starting the EW timer. We'll see if this works.
-	_ftime(&tStruct);
-	thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0);
-	outputTime = thisTime + 5.0;
-
-	if (getEWState() == RED)
-	{
-		while (outputTime <= 50)
-		{
-			_ftime(&tStruct);
-			thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0);
-
-			if (thisTime >= outputTime)
+			else if ((counterEW > 45) && (counterEW <= 50))
 			{
-				outputTime += 5.0;
-				cout << "The current state of EW light is RED." << endl;
+				setEWState(YELLOW);
 			}
-		}
 
-		outputTime = 0;
-		setNSState(GREEN);
-	}
-
-	else if (getNSState() == GREEN)
-	{
-		while (outputTime <= 5)
-		{
-			_ftime(&tStruct);
-			thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0);
-
-			if (thisTime >= outputTime)
+			else if ((counterEW > 50) && (counterEW <= 100))
 			{
-				outputTime += 5.0;
-				cout << "The current state of EW light is GREEN." << endl;
+				setEWState(RED);
 			}
-		}
 
-		outputTime = 0;
-		setNSState(YELLOW);
-	}
 
-	else if (getNSState() == YELLOW)
-	{
-		while (outputTime <= 5)
-		{
-			_ftime(&tStruct);
-			thisTime = tStruct.time + (((double)(tStruct.millitm)) / 1000.0);
-
-			if (thisTime >= outputTime)
-			{
-				outputTime += 5.0;
-				cout << "The current state of NS light is YELLOW." << endl;
-			}
-		}
-
-		outputTime = 0;
-		setNSState(RED);
 	}
 }
 
 LightState TrafficLight::getNSState()
 {
 
-	// Set state to Green
-	// While timer is less than 45
-	// Then set to yellow
-	// etc etc
-	trafficUpDate();
-	return state;
+	return NSState;
 }
 
 LightState TrafficLight::getEWState()
 {
-	// Set state to Red
-	// While timer is less than 50
-	// Then set to green
-	// etc etc
-	trafficUpDate();
-	return state;
+	return EWState;
 }
 
 void TrafficLight::setNSState(LightState state)
 {
-	this->state = state;
+	this->NSState = state;
 }
 
 void TrafficLight::setEWState(LightState state)
 {
-	this->state = state;
+	this->EWState = state;
 }
