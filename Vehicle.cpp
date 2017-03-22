@@ -1,7 +1,15 @@
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
 #include "includes.h"
 #include "TrafficLight.h"
 #include "Map.h"
 #include "Road.h"
+#include <stdlib.h>
+#include <sys/types.h>    
+#include <sys/timeb.h>     
+#include <time.h>
 
 using namespace std;
 
@@ -9,8 +17,6 @@ Vehicle::Vehicle()
 {
 
 	carID = 0;
-	xVehicleStartPoint = 0.0;
-	yVehicleStartPoint = 0.0;
 	direction = 0.0;
 	Acceleration = 0.0;
 	speedMPH = 0.0;
@@ -21,58 +27,92 @@ Vehicle::Vehicle()
 
 Vehicle::~Vehicle()
 {
-	delete[] type;
+
 }
 
-void Vehicle::Move()
+void Vehicle::Move(char *filename)
 {
 	
-	int intersectID = 0;
-	TrafficSimDataParser *dp = new TrafficSimDataParser("TrafficSim01.xml");
-	Map *mapInst = new Map(dp, roadName, &intersectID);
-	road = mapInst->getRoad(roadName);
-	Intersection *intersection = mapInst->getIntersection(intersectID);
-
-// I am doing it this way because it makes sure the vehicle data 
-// will not be reinitialized each time the move function is called
-if (counter < 1)
-{ 
-	if(dp->getVehicleData(type, &carID, &xVehicleLocation, &yVehicleLocation, &direction, &Acceleration))
+	// I am doing it this way because it makes sure the vehicle data 
+	// and other data will not be reinitialized each time the move function is called
+	if (counter < 1)
 	{
-		setType(type);
-		setCarID(carID);
-		setxVehicleLocation(xVehicleLocation);
-		setyVehicleLocation(yVehicleLocation);
-		setDirection(direction);
-		setAcceleration(Acceleration);
+		dp = new TrafficSimDataParser(filename);
+
+		// Get instance of Map, which creates the collections of roads and intersections
+		mapInst = new Map(filename);
+
+		// Get the vehicle data. There's only one vehicle so this can be done just once.
+		if (dp->getVehicleData(type, &carID, &xVehicleLocation, &yVehicleLocation, &direction, &Acceleration))
+		{
+			setType(type);
+			setCarID(carID);
+			setxVehicleLocation(xVehicleLocation);
+			setyVehicleLocation(yVehicleLocation);
+			setDirection(direction);
+			setAcceleration(Acceleration);
+		}
+
+		// Initalizing an instance of intersection and road. 
+
+		int intersectionID;
+		double xPosition;
+		double yPosition;
+		char nameN[32];
+		char nameE[32];
+		char nameS[32];
+		char nameW[32];
+
+		if (dp->getIntersectionData(&intersectionID, &xPosition, &yPosition, nameN, nameE, nameS, nameW))
+		{ 
+			intersection->setIntersectionID(intersectionID);
+			intersection->setxCenterPoint(xPosition);
+			intersection->setyCenterPoint(yPosition);
+			intersection->setNameN(nameN);
+			intersection->setNameE(nameE);
+			intersection->setNameS(nameS);
+			intersection->setNameW(nameW);
+		}
+
+		char name[64];
+		double xStart;
+		double yStart;
+		double xEnd;
+		double yEnd;
+		int intersectStart;
+		int intersectEnd;
+		double speedLimit;
+		int numLanes;
+
+		if (dp->getRoadData(name, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes))
+		{
+			road->setRoadData(name, xStart, yStart, xEnd, yEnd, intersectStart, intersectEnd, speedLimit, numLanes);
+		}
+
+		intersection->intersectUpDate(light);
+
+		srand((unsigned int)(time(NULL)));
+		counter++;
 	}
 
-	counter++;
-}
 	// Adjusted x and y locations as the vehicle is moving
 
+	double xCenter;
+	double yCenter;
 	double laneWidth = 3.6;
 	double distToCenter = intersection->getxCenterPoint() - xVehicleLocation;
 	double BD = ((road->getLaneNumber()) == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
 	double distAfterTurn = speedMPS - distToCenter - BD;
-	double newXIfTurn = intersection->getxCenterPoint() - distAfterTurn;
-	double newYIfTurn = yVehicleLocation + distAfterTurn;
 	double AD = 0;
-
 
 	// FOR SETTING VEHICLE SPEED
 	double BC = ((road->getLaneNumber()) == 4) ? (laneWidth * 2.0) : (laneWidth * 1.0);
 	double AC = intersection->getxCenterPoint() - xVehicleLocation;
 	double distNextIntersection = AC - BC;
-	cout << "Distance to next intersection: " << distNextIntersection << endl;
 
 	// END FOR SETTING VEHICLE SPEED
 
-	bool turnDecided = false;
-
-	// Some necessary objects
-	Intersection *nextIntersection = new Intersection();
-	Intersection *curIntersection = mapInst->getIntersection(intersectID);
+	// Will be necessary later
 	Road *tempRoad = new Road();
 
 	if (road == NULL)
@@ -107,32 +147,30 @@ if (counter < 1)
 			cout << "This program is not working. Terminate." << endl;
 		}
 
-		else
-		{
-			cout << "Everything might be fine." << endl;
-		}
 	}
 
-	nextIntersection = mapInst->getNextIntersection(xVehicleLocation, yVehicleLocation, direction);
-
-	// HANDLING RARE EXCEPTION -- SEE LAST SLIDE
+	nextIntersection = mapInst->getNextIntersection(xVehicleLocation, yVehicleLocation, direction, road->getRoadName());
+	
+	// HANDLING RARE EXCEPTION 
 	if (nextIntersection == NULL)
 	{
-		curIntersection = mapInst->getIntersection(intersectID);
-		intersection->getxCenterPoint();
-		intersection->getyCenterPoint();
+		Intersection *tempInt = new Intersection;
+		tempInt = mapInst->getIntersection(intersection->getIntersectionID());
+
+		xCenter = tempInt->getxCenterPoint();
+		yCenter = tempInt->getyCenterPoint();
 
 		if (direction == 0.0)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				tempRoad = mapInst->getRoad(intersection->getNameN());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				tempRoad = mapInst->getRoad(intersection->getNameW());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesEW / 2) * laneWidth;
+	
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
 				
 				direction = 90.0;
@@ -140,13 +178,13 @@ if (counter < 1)
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				tempRoad = mapInst->getRoad(intersection->getNameS());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				tempRoad = mapInst->getRoad(intersection->getNameW());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesEW / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
 
 				direction = 270.0;
@@ -157,28 +195,28 @@ if (counter < 1)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				tempRoad = mapInst->getRoad(intersection->getNameW());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				tempRoad = mapInst->getRoad(intersection->getNameS());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesEW == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesNS / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
-				direction = 0.0;
+				direction = 180.0;
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				tempRoad = mapInst->getRoad(intersection->getNameE());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				tempRoad = mapInst->getRoad(intersection->getNameS());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesEW == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesNS / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
-				direction = 180.0;
+				direction = 0.0;
 			}
 		}
 
@@ -186,26 +224,26 @@ if (counter < 1)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				tempRoad = mapInst->getRoad(intersection->getNameS());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				tempRoad = mapInst->getRoad(intersection->getNameE());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesEW / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
 				direction = 270.0;
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				tempRoad = mapInst->getRoad(intersection->getNameN());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				tempRoad = mapInst->getRoad(intersection->getNameE());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesEW / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
 				direction = 90.0;
 			}
@@ -215,73 +253,132 @@ if (counter < 1)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				tempRoad = mapInst->getRoad(intersection->getNameE());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				tempRoad = mapInst->getRoad(intersection->getNameN());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesEW == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesNS / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
 				direction = 180.0;
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				tempRoad = mapInst->getRoad(intersection->getNameW());
 				int numberOfLanesEW = tempRoad->getLaneNumber();
-				tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				tempRoad = mapInst->getRoad(intersection->getNameN());
 				int numberOfLanesNS = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xVehicleLocation + ((numberOfLanesEW == 2) ? 0.5 : 1.5) * laneWidth;
-				yVehicleLocation = yVehicleLocation + (numberOfLanesNS / 2) * laneWidth;
+				xVehicleLocation = xCenter + ((numberOfLanesNS == 2) ? 0.5 : 1.5) * laneWidth;
+				yVehicleLocation = yCenter + (numberOfLanesEW / 2) * laneWidth;
 
 				direction = 0.0;
 			}
 		}
+
+		nextIntersection = mapInst->getIntersection(intersection->getIntersectionID());
 	}
 
 	// END HANDLING RARE EXCEPTION
 
+
 	if (turnDecided == false)
 	{
-		int rand_num = rand() % 100;
+		value = rand() % max;
 
-		if (rand_num < 30)
+		if (value < 30)
 		{
 			turnDirection = LEFT;
+
+			turnDecided = true;
 		}
 
-		else if ((rand_num >= 30) && (rand_num <= 60))
+		else if ((value >= 30) && (value <= 60))
 		{
 			turnDirection = RIGHT;
+
+			turnDecided = true;
 		}
 
-		else if ((rand_num >= 60) && (rand_num <= 100))
+		else if ((value >= 60) && (value <= 100))
 		{
 			turnDirection = STRAIGHT;
+			turnDecided = false;
 		}
-
-		turnDecided = true;
 	}
 
+	// Setting the speed limit and stop distances
 	double speedLimitMPH = road->getSpeedLimitMPH();
 	double speedLimitMPS = speedLimitMPH * 0.44704;
 	double stopDist = 1.1 * speedMPH + 0.06 * pow(speedMPH, 2);
 	double stopDistSL = 1.1 * speedLimitMPH + 0.06 * pow(speedLimitMPH, 2);
 	stopDistSL *= 0.3048;
 
-	// Set vehicle speed
-	if ((light->getNSState() == RED) || (light->getNSState() == YELLOW))
-	{
 
-		if (stopDistSL < distNextIntersection)
+
+	// Set vehicle speed
+
+	// If going North or South
+	if ((direction == 90.0) || (direction == 270.0))
+	{
+		if ((light->getNSState() == RED) || (light->getNSState() == YELLOW))
 		{
-			
+
+			if (stopDistSL < distNextIntersection)
+			{
+
+				if (speedMPS < speedLimitMPS)
+				{
+					speedMPS += Acceleration;
+					speedMPH = speedMPS / 0.44704;
+
+					if (speedMPS > speedLimitMPS)
+					{
+						speedMPS = speedLimitMPS;
+						speedMPH = speedMPS / 0.44704;
+					}
+				}
+
+			}
+
+			else if ((stopDistSL > distNextIntersection) && (speedMPS != 0))
+			{
+
+				while ((stopDist > distNextIntersection) && (distNextIntersection > laneWidth) && (speedMPS > 0))
+				{
+					speedMPS -= Acceleration;
+					speedMPH = speedMPS / 0.44704;
+					if (speedMPS < 0)
+					{
+						speedMPS = 0;
+						speedMPH = 0;
+					}
+					stopDist = 1.1 * speedMPH + 0.06 * pow(speedMPH, 2);
+					stopDist *= 0.3048;
+					if (speedMPS == 0)
+					{
+						break;
+					}
+				}
+
+			}
+
+			if (distNextIntersection < laneWidth)
+			{
+				speedMPS = 0;
+				speedMPH = 0;
+			}
+		}
+
+		else
+		{
+
 			if (speedMPS < speedLimitMPS)
 			{
 				speedMPS += Acceleration;
-				speedMPH += speedMPS / 0.44704;
+				speedMPH = speedMPS / 0.44704;
 
 				if (speedMPS > speedLimitMPS)
 				{
@@ -292,58 +389,86 @@ if (counter < 1)
 
 		}
 
-		else if ((stopDist > distNextIntersection) && (speedMPS != 0))
-		{
-
-			while ((stopDist > distNextIntersection) && (distNextIntersection > laneWidth) && (speedMPS > 0))
-			{
-				speedMPS -= Acceleration;
-				speedMPH = speedMPS / 0.44704;
-				if (speedMPS < 0)
-				{
-					speedMPS = 0;
-					speedMPH = 0;
-				}
-				stopDist = 1.1 * speedMPH + 0.06 * pow(speedMPH, 2);
-				stopDist *= 0.3048;
-			    if (speedMPS == 0)
-				{
-					break;
-				}
-			}
-
-		}
-
-		if (distNextIntersection < laneWidth)
-		{
-			speedMPS = 0;
-			speedMPH = 0;
-		}
 	}
 
-	else
+	// If going East or West
+	if ((direction == 0.0) || (direction == 180.0))
 	{
-
-		if (speedMPS < speedLimitMPS)
+		if ((light->getEWState() == RED) || (light->getEWState() == YELLOW))
 		{
-			speedMPS += Acceleration;
-			speedMPH = speedMPS / 0.44704;
-			if (speedMPS > speedLimitMPS)
+
+			if (stopDistSL < distNextIntersection)
 			{
-				speedMPS = speedLimitMPS;
-				speedMPH = speedMPS / 0.44704;
+
+				if (speedMPS < speedLimitMPS)
+				{
+					speedMPS += Acceleration;
+					speedMPH = speedMPS / 0.44704;
+
+					if (speedMPS > speedLimitMPS)
+					{
+						speedMPS = speedLimitMPS;
+						speedMPH = speedMPS / 0.44704;
+					}
+				}
+
+			}
+
+			else if ((stopDist > distNextIntersection) && (speedMPS != 0))
+			{
+
+				while ((stopDist > distNextIntersection) && (distNextIntersection > laneWidth) && (speedMPS > 0))
+				{
+					speedMPS -= Acceleration;
+					speedMPH = speedMPS / 0.44704;
+
+					if (speedMPS < 0)
+					{
+						speedMPS = 0;
+						speedMPH = 0;
+					}
+					stopDist = 1.1 * speedMPH + 0.06 * pow(speedMPH, 2);
+					stopDist *= 0.3048;
+					if (speedMPS == 0)
+					{
+						break;
+					}
+				}
+
+			}
+
+			if (distNextIntersection < laneWidth)
+			{
+				speedMPS = 0;
+				speedMPH = 0;
 			}
 		}
 
-	}
+		else
+		{
 
+			if (speedMPS < speedLimitMPS)
+			{
+				speedMPS += Acceleration;
+				speedMPH = speedMPS / 0.44704;
+
+				if (speedMPS > speedLimitMPS)
+				{
+					speedMPS = speedLimitMPS;
+					speedMPH = speedMPS / 0.44704;
+				}
+			}
+
+		}
+	}
+	
 	// Get the center points of the next intersection
-	double xCenter = nextIntersection->getxCenterPoint();
-	double yCenter = nextIntersection->getyCenterPoint();
+	xCenter = nextIntersection->getxCenterPoint();
+    yCenter = nextIntersection->getyCenterPoint();
 
 	if (direction == 0.0)
 	{
-		xVehicleLocation += speedMPS;
+		xVehicleLocation = xVehicleLocation + speedMPS;
 		yVehicleLocation = yVehicleLocation;
 
 		if (xVehicleLocation > xCenter)
@@ -351,80 +476,199 @@ if (counter < 1)
 			
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				tempRoad = mapInst->getRoad(intersection->getNameN());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD - BD;
+				// In other words, if the road we want to turn left on is null
+				if (numLanes == 0)
+				{
+					// Now we are going to decide between turning right and continuing straight.
+					value = rand() % max;
 
-				xVehicleLocation = xCenter + BD;
-				yVehicleLocation = yVehicleLocation - BC;
+					// 40% of the time we will turn right, else we will continue going straight
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameS());
+						numLanes = tempRoad->getLaneNumber();
 
-				setDirection(90.0);
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = xCenter - xVehicleLocation;
+						BC = AC - AD + BD;
+
+						xVehicleLocation = xCenter - BD;
+						yVehicleLocation = yVehicleLocation + BC;
+
+						road = mapInst->getRoad(intersection->getNameS());
+
+						setDirection(270.0);
+					}
+
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = xCenter - xVehicleLocation;
+					BC = AC - AD - BD;
+
+					xVehicleLocation = xCenter + BD;
+					yVehicleLocation = yVehicleLocation - BC;
+
+					road = mapInst->getRoad(intersection->getNameN());
+					setDirection(90.0);
+				}
+		
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				tempRoad = mapInst->getRoad(intersection->getNameS());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD + BD;
+				// Same as above
+				if (numLanes == 0)
+				{
+					value = rand() % max;
 
-				xVehicleLocation = xCenter - BD;
-				yVehicleLocation = yVehicleLocation + BC;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameN());
+						numLanes = tempRoad->getLaneNumber();
 
-				road = mapInst->getRoad(intersection->getNameS());
-				setDirection(270.0);
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = xCenter - xVehicleLocation;
+						BC = AC - AD - BD;
+
+						xVehicleLocation = xCenter + BD;
+						yVehicleLocation = yVehicleLocation - BC;
+
+						road = mapInst->getRoad(intersection->getNameN());
+						setDirection(90.0);
+					}
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = xCenter - xVehicleLocation;
+					BC = AC - AD + BD;
+
+					xVehicleLocation = xCenter - BD;
+					yVehicleLocation = yVehicleLocation + BC;
+
+					road = mapInst->getRoad(intersection->getNameS());
+
+					setDirection(270.0);
+				}
+
 			}
 
+			turnDecided = false;
 		}
-
 
 	}
 
 	else if (direction == 90.0)
 	{
-		xVehicleLocation = xVehicleLocation + speedMPS;
-		yVehicleLocation = yVehicleLocation;
+		xVehicleLocation = xVehicleLocation;
+		yVehicleLocation = yVehicleLocation - speedMPS;
 
-		if (xVehicleLocation > xCenter)
+		if (yVehicleLocation < yCenter)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				tempRoad = mapInst->getRoad(intersection->getNameW());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD - BD;
+				// Again, same as above
+				if (numLanes == 0)
+				{
+					value = rand() % max;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameE());
+						numLanes = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xCenter + BD;
-				yVehicleLocation = yVehicleLocation - BC;
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = yCenter - yVehicleLocation;
+						BC = AC - AD + BD;
 
-				setDirection(90.0);
+						xVehicleLocation = xVehicleLocation + BC;
+						yVehicleLocation = yCenter - BD;
+
+						road = mapInst->getRoad(intersection->getNameE());
+						setDirection(0.0);
+					}
+	
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = yCenter - yVehicleLocation;
+					BC = AC - AD - BD;
+
+					xVehicleLocation = xVehicleLocation - BC;
+					yVehicleLocation = yCenter + BD;
+
+					road = mapInst->getRoad(intersection->getNameW());
+
+					setDirection(180.0);
+				}
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				tempRoad = mapInst->getRoad(intersection->getNameE());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD + BD;
+				if (numLanes == 0)
+				{
+					value = rand() % max;
 
-				xVehicleLocation = xCenter - BD;
-				yVehicleLocation = yVehicleLocation + BC;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameW());
+						numLanes = tempRoad->getLaneNumber();
 
-				setDirection(270.0);
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = yCenter - yVehicleLocation;
+						BC = AC - AD - BD;
+
+						xVehicleLocation = xVehicleLocation - BC;
+						yVehicleLocation = yCenter + BD;
+
+						road = mapInst->getRoad(intersection->getNameW());
+
+						setDirection(180.0);
+					}
+	
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = yCenter - yVehicleLocation;
+					BC = AC - AD + BD;
+
+					xVehicleLocation = xVehicleLocation + BC;
+					yVehicleLocation = yCenter - BD;
+
+					road = mapInst->getRoad(intersection->getNameE());
+					setDirection(0.0);
+				}
+
 			}
+
+			turnDecided = false;
 		}
 
 
@@ -432,42 +676,99 @@ if (counter < 1)
 
 	else if (direction == 180.0)
 	{
-		xVehicleLocation = xVehicleLocation + speedMPS;
+		xVehicleLocation = xVehicleLocation - speedMPS;
 		yVehicleLocation = yVehicleLocation;
 
-		if (xVehicleLocation > xCenter)
+		if (xVehicleLocation < xCenter)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameW());
+				tempRoad = mapInst->getRoad(intersection->getNameS());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD - BD;
+				if (numLanes == 0)
+				{
+					value = rand() % max;
 
-				xVehicleLocation = xCenter + BD;
-				yVehicleLocation = yVehicleLocation - BC;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameN());
 
-				setDirection(90.0);
+						numLanes = tempRoad->getLaneNumber();
+
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = xCenter - xVehicleLocation;
+						BC = AC - AD + BD;
+
+						xVehicleLocation = xCenter - BD;
+						yVehicleLocation = yVehicleLocation + BC;
+
+						road = mapInst->getRoad(intersection->getNameN());
+						setDirection(90.0);
+					}
+
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = xCenter - xVehicleLocation;
+					BC = AC - AD - BD;
+
+					xVehicleLocation = xCenter + BD;
+					yVehicleLocation = yVehicleLocation - BC;
+
+					road = mapInst->getRoad(intersection->getNameS());
+					setDirection(270.0);
+				}
+
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameE());
+				tempRoad = mapInst->getRoad(intersection->getNameN());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD + BD;
+				if (numLanes == 0)
+				{
+					value = rand() % max;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameS());
+						numLanes = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xCenter - BD;
-				yVehicleLocation = yVehicleLocation + BC;
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = xCenter - xVehicleLocation;
+						BC = AC - AD - BD;
 
-				setDirection(270.0);
+						xVehicleLocation = xCenter + BD;
+						yVehicleLocation = yVehicleLocation - BC;
+
+						road = mapInst->getRoad(intersection->getNameS());
+						setDirection(270.0);
+					}
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = xCenter - xVehicleLocation;
+					BC = AC - AD + BD;
+
+					xVehicleLocation = xCenter - BD;
+					yVehicleLocation = yVehicleLocation + BC;
+
+					road = mapInst->getRoad(intersection->getNameN());
+					setDirection(90.0);
+				}
+		
 			}
+
+			turnDecided = false;
 		}
 
 
@@ -475,79 +776,116 @@ if (counter < 1)
 
 	else if (direction == 270.0)
 	{
-		xVehicleLocation = xVehicleLocation + speedMPS;
-		yVehicleLocation = yVehicleLocation;
+		xVehicleLocation = xVehicleLocation;
+		yVehicleLocation = yVehicleLocation + speedMPS;
 
-		if (xVehicleLocation > xCenter)
+		if (yVehicleLocation > yCenter)
 		{
 			if (turnDirection == LEFT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameS());
+				tempRoad = mapInst->getRoad(intersection->getNameE());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD - BD;
+				if (numLanes == 0)
+				{
+					value = rand() % max;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameW());
+						numLanes = tempRoad->getLaneNumber();
 
-				xVehicleLocation = xCenter + BD;
-				yVehicleLocation = yVehicleLocation - BC;
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = yCenter - yVehicleLocation;
+						BC = AC - AD + BD;
 
-				setDirection(90.0);
+						xVehicleLocation = xVehicleLocation - BC;
+						yVehicleLocation = yCenter + BD;
+
+						road = mapInst->getRoad(intersection->getNameW());
+						setDirection(180.0);
+					}
+	
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = yCenter - yVehicleLocation;
+					BC = AC - AD - BD;
+
+					xVehicleLocation = xVehicleLocation + BC;
+					yVehicleLocation = yCenter - BD;
+
+					road = mapInst->getRoad(intersection->getNameE());
+					setDirection(0.0);
+				}
+		
 			}
 
 			else if (turnDirection == RIGHT)
 			{
-				tempRoad = mapInst->getRoad(curIntersection->getNameN());
+				tempRoad = mapInst->getRoad(intersection->getNameW());
 				int numLanes = tempRoad->getLaneNumber();
 
-				AC = speedMPS;
-				BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
-				AD = xCenter - xVehicleLocation;
-				BC = AC - AD + BD;
+				if (numLanes == 0)
+				{
+					value = rand() % max;
 
-				xVehicleLocation = xCenter - BD;
-				yVehicleLocation = yVehicleLocation + BC;
+					if (value <= 40)
+					{
+						tempRoad = mapInst->getRoad(intersection->getNameE());
+						numLanes = tempRoad->getLaneNumber();
 
-				setDirection(270.0);
+						AC = speedMPS;
+						BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+						AD = yCenter - yVehicleLocation;
+						BC = AC - AD - BD;
+
+						xVehicleLocation = xVehicleLocation + BC;
+						yVehicleLocation = yCenter - BD;
+
+						road = mapInst->getRoad(intersection->getNameE());
+						setDirection(0.0);
+					}
+			
+				}
+
+				else if (numLanes != 0)
+				{
+					AC = speedMPS;
+					BD = (numLanes == 4) ? (laneWidth * 1.5) : (laneWidth * .5);
+					AD = yCenter - yVehicleLocation;
+					BC = AC - AD + BD;
+
+					xVehicleLocation = xVehicleLocation - BC;
+					yVehicleLocation = yCenter + BD;
+
+					road = mapInst->getRoad(intersection->getNameW());
+					setDirection(180.0);
+				}
 			}
+
+			turnDecided = false;
 		}
 
 
 	}
 	
+	// Update the status of traffic lights at each intersection
+	intersection->intersectUpDate(light);
+
+	intersection = nextIntersection;
 }
 
 void Vehicle::PrintStatus()
 {
-	light->NSLightUpDate();
-	light->EWLightUpDate();
+	
 	cout << "Vehicle type: " << type << endl;
-	cout << "Vehicle X location: " << xVehicleLocation << endl;
-	cout << "Vehicle Y location: " << yVehicleLocation << endl;
-	cout << "Vehicle speed in MPH: " << speedMPH << endl;
-	cout << "Road vehicle his driving on: " << road->getRoadName() << endl;
-
-
-	if (direction == 0.0)
-	{
-		cout << "Vehicle direction: EAST" << endl;
-	}
-
-	else if (direction == 90.0)
-	{
-		cout << "Vehicle direction: NORTH" << endl;
-	}
-
-	else if (direction == 180.0)
-	{
-		cout << "Vehicle direction: WEST" << endl;
-	}
-
-	else if (direction == 270.0)
-	{
-		cout << "Vehicle direction: SOUTH" << endl;
-	}
+	cout << "Vehicle is currently traveling along " << road->getRoadName() << "." << endl;
+	cout << "Vehicle is driving at " << direction << " degrees, going a speed of " << speedMPH << " MPH." << endl;
+	cout << "The current location of Vehicle is at these X/Y coordinates: (" << xVehicleLocation << ", " << yVehicleLocation << ")" << endl;
 
 	if (light->getNSState() == 0)
 	{
@@ -602,16 +940,6 @@ int Vehicle::getCarID()
 	return carID;
 }
 
-void Vehicle::setxVehicleStartPoint(double start)
-{
-	xVehicleStartPoint = start;
-}
-
-void Vehicle::setyVehicleStartPoint(double start)
-{
-	yVehicleStartPoint = start;
-}
-
 void Vehicle::setDirection(double direc)
 {
 		direction = direc;
@@ -642,11 +970,6 @@ void Vehicle::setyVehicleLocation(double location)
 	yVehicleLocation = location;
 }
 
-void Vehicle::setTurnDirection(turnState turnDirection)
-{
-	this->turnDirection = turnDirection;
-}
-
 double Vehicle::getSpeedMPS()
 {
 	return speedMPS;
@@ -655,16 +978,6 @@ double Vehicle::getSpeedMPS()
 double Vehicle::getSpeedMPH()
 {
 	return speedMPH;
-}
-
-double Vehicle::getxVehicleStartPoint()
-{
-	return xVehicleStartPoint;
-}
-
-double Vehicle::getyVehicleStartPoint()
-{
-	return yVehicleStartPoint;
 }
 
 double Vehicle::getDirection()
@@ -686,63 +999,3 @@ double Vehicle::getyVehicleLocation()
 {
 	return yVehicleLocation;
 }
-
-
-
-
-// Testing new stuff
-
-void Vehicle::Move()
-{
-	
-
-// I am doing it this way because it makes sure the vehicle data 
-// will not be reinitialized each time the move function is called
-if (counter < 1)
-{ 
-	dp = new TrafficSimDataParser("TrafficSim01.xml");
-	road = new Road();
-	intersection = new Intersection();
-	nextIntersection = new Intersection();
-	if(dp->getVehicleData(type, &carID, &xVehicleLocation, &yVehicleLocation, &direction, &Acceleration))
-	{
-		setType(type);
-		setCarID(carID);
-		setxVehicleLocation(xVehicleLocation);
-		setyVehicleLocation(yVehicleLocation);
-		setDirection(direction);
-		setAcceleration(Acceleration);
-	}
-
-	// Local variables needed to get the initial road and intersection
-	char roadName[64];
-	double xStart;
-	double yStart;
-	double xEnd;
-	double yEnd;
-	int intersectStart;
-	int intersectEnd;
-	double speedLimit;
-	int numLanes;
-	int intersectID;
-	double xPosition;
-	double yPosition;
-	char nameN[32];
-	char nameE[32];
-	char nameS[32];
-	char nameW[32];
-
-	Map *map = new Map(dp);
-	dp->getRoadData(roadName, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes);
-	dp->getIntersectionData(&intersectID, &xPosition, &yPosition, nameN, nameE, nameS, nameW);
-
-	road->setRoadData(roadName, xStart, yStart, xEnd, yEnd, intersectStart, intersectEnd, speedLimit, numLanes);
-	intersection->setIntersectionData(intersectID, xPosition, yPosition, nameN, nameE, nameS, nameW);
-
-	road = map->getRoad(road->getRoadName());
-	intersection = map->getIntersection(intersectID);
-
-	counter++;
-}
-	// Adjusted x and y locations as the vehicle is moving
-
