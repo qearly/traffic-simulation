@@ -8,27 +8,37 @@ class Vehicle
 	private:
 		char type[64];
 		int carID;
-		double xVehicleStartPoint;
-		double yVehicleStartPoint;
-		int startDirection;
+		double direction;
 		double Acceleration;
 		double speedMPH;
 		double speedMPS;
 		double xVehicleLocation;
 		double yVehicleLocation;
+		int counter = 0;
+		int max = 100;
+		double value;
+		bool turnDecided = false;
+		TrafficLight *light = new TrafficLight();
+		Road *road = new Road();
+		TrafficSimDataParser *dp;
+		Intersection *intersection = new Intersection();
+		Map *mapInst;
+		Intersection *nextIntersection;
+
+	protected:
+		turnState turnDirection;
 
 	public:
-		void Move();
-		void PrintReport();
-		void setVehicleSpeed(double mps, double mph);
+		Vehicle();
+		~Vehicle();
+		void Move(char *filename);
+		void PrintStatus();
 		void setType(char *name);
 		void setCarID(int ID);
 		char * getType();
 		int getCarID();
 
-		void setxVehicleStartPoint(double start);
-		void setyVehicleStartPoint(double start);
-		void setStartDirection(int start);
+		void setDirection(double direc);
 		void setAcceleration(double acceleration);
 		void setSpeedMPS(double speed);
 		void setSpeedMPH(double speed);
@@ -37,11 +47,8 @@ class Vehicle
 
 		double getSpeedMPS();
 		double getSpeedMPH();
-		double getxVehicleStartPoint();
-		double getyVehicleStartPoint();
-		int getStartDirection();
+		double getDirection();
 		double getAcceleration();
-		double getSpeed();
 		double getxVehicleLocation();
 		double getyVehicleLocation();
 
