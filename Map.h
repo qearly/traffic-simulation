@@ -4,12 +4,11 @@
 class Map
 {
 	private:
-		
+		vector<Road*>rCollect;
+		vector<Intersection*>iCollect;
 
 	public:
-		vector<Road*>roadCollection;
-		vector<Intersection*>intersectCollection;
-		Map(TrafficSimDataParser *dp);
+		Map(char *filename);
 		~Map();
 		Road *getRoad(char *rdID);
 		Road *getRoad(double x, double y, double dir);
@@ -17,7 +16,7 @@ class Map
 		Intersection *getIntersection(int id);
 		Intersection *getNextIntersection(double x, double y, double dir);
 		Intersection *getIntersection(double x, double y);
-		void PrintReport();
+		void PrintStatus();
 		void upDate(double time);
 };
 
