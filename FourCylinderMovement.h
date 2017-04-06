@@ -26,7 +26,6 @@ class FourCylinderMovement : public Movement
 		turnState turnDirection;
 
 	public:
-		FourCylinderMovement();
-		~FourCylinderMovement();
 		void Move(char *filename);
+		void PrintStatus();
 };
