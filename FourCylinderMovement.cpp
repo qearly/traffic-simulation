@@ -1,7 +1,3 @@
-#define _CRT_SECURE_NO_DEPRECATE 
-#define _CRT_SECURE_NO_WARNINGS 
-
-
 #include "FourCylinderMovement.h"
 #include "TrafficLight.h"
 #include "Map.h"
