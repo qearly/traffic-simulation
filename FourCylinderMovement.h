@@ -1,21 +1,21 @@
-#pragma once
-
+#include "Vehicle.h"
 #include "Movement.h"
-#include "TrafficLight.h"
+#include "TrafficLightManager.h"
 #include "Road.h"
 #include "TrafficSimDataParser.h"
 #include "Map.h"
 
-
+class Vehicle;
 class FourCylinderMovement : public Movement
 {
 	private:
 		int counter;
 		int max;
 		double value;
-		bool turnDecided = false;
+		bool turnDecided;
 		enum turnState { LEFT, STRAIGHT, RIGHT };
-		TrafficLight *light;
+		Vehicle *vehicle;
+		TrafficLightManager *light;
 		Road *road;
 		TrafficSimDataParser *dp;
 		Intersection *intersection;
