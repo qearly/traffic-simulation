@@ -6,11 +6,12 @@
 class VehicleFactory
 {
 	private:
-		VehicleFactory();
+		
 
 	public:
+		VehicleFactory();
 		~VehicleFactory();
 		virtual Vehicle *getVehicle(char *name);
 		virtual Vehicle *getInstance();
-		virtual Vehicle *createVehicle();
+		Vehicle *createVehicle(char *type, char *filename);
 };
