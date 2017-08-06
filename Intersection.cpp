@@ -1,10 +1,21 @@
+/*******************************************************************
+*   CS 307 Programming Assignment 2
+*   File: Intersection.cpp
+*   Author: Matt Stewart
+*   Desc: Implementation file for the Intersection class, contains necessary behaviors for intersection object.
+*   Date: 4-8-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
+
+
 #define _CRT_SECURE_NO_DEPRECATE 
 #define _CRT_SECURE_NO_WARNINGS 
 
 
 #include "Intersection.h"
 #include "Road.h"
-#include "TrafficLight.h"
+#include "TrafficLightManager.h"
 #include "TrafficSimDataParser.h"
 
 using namespace std;
@@ -48,7 +59,7 @@ bool Intersection::isPointInIntersection(double xCenterPoint, double yCenterPoin
 
 // No need to loop through intersection because the lights
 // at each intersection are synced
-void Intersection::intersectUpDate(TrafficLight *light)
+void Intersection::intersectUpDate(TrafficLightManager *light)
 {
 	light->NSLightUpDate();
 	light->EWLightUpDate();

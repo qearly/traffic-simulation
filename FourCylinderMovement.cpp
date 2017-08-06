@@ -1,3 +1,17 @@
+/*******************************************************************
+*   CS 307 Programming Assignment 2
+*   File: FourCylinderMovement.cpp
+*   Author: Matt Stewart
+*   Desc: Movement subclass
+*   Date: 4-8-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
+
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
 #include "FourCylinderMovement.h"
 #include "Vehicle.h"
 #include "VehicleFactory.h"

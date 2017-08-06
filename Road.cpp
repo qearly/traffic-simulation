@@ -1,3 +1,15 @@
+/*******************************************************************
+*   CS 307 Programming Assignment 1
+*   File: Road.cpp
+*   Author: Matt Stewart
+*   Desc: Implementation file for the Road class, contains behaviors and information for road objects.
+*   Date: 3-19-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
+
+
+
 #define _CRT_SECURE_NO_DEPRECATE 
 #define _CRT_SECURE_NO_WARNINGS 
 
@@ -34,7 +46,8 @@ bool Road::isPointOnRoad(double xCoord, double yCoord, double direction, char *f
 	double yUpperLeft;
 	double xLowerRight;
 	double yLowerRight;
-	TrafficSimDataParser *dp = new TrafficSimDataParser(filename);
+	TrafficSimDataParser *dp = TrafficSimDataParser::getInstance();
+	dp->setDataFileName(filename);
 	int numberRoads = dp->getRoadCount();
 
 	int intersectID = 0;

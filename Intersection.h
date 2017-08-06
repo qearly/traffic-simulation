@@ -1,7 +1,18 @@
-#ifndef INTERSECTION_H_
-#define INTERSECTION_H_
+/*******************************************************************
+*   CS 307 Programming Assignment 1
+*   File: Intersection.h
+*   Author: Matt Stewart
+*   Desc: Intersection header file
+*   Date: 3-19-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
 
-#include <string>
+#pragma once
+
+#include "TrafficLightManager.h"
+
+class TrafficLightManager;
 
 class Intersection
 {
@@ -20,10 +31,11 @@ class Intersection
 		char curRoad[64];
 
 	public:
+		
 		Intersection();
 		~Intersection();
 		bool isPointInIntersection(double xCenterPoint, double yCenterPoint);
-		void intersectUpDate(TrafficLight *light);
+		void intersectUpDate(TrafficLightManager *light);
 		void setIntersectionID(int ID);
 		void setxCenterPoint(double point);
 		void setyCenterPoint(double point);
@@ -51,5 +63,3 @@ class Intersection
 		char *getNameW();
 		char *getCurRoad();
 };
-
-#endif

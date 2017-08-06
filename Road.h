@@ -1,57 +1,60 @@
+/*******************************************************************
+*   CS 307 Programming Assignment 1
+*   File: Road.h
+*   Author: Matt Stewart
+*   Desc: Road header file
+*   Date: 3-19-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
+
 #ifndef ROAD_H_
 #define ROAD_H_
-
-#include <string>
 
 class Road
 {
 	private:
-		string roadName;
-		bool directionNS;
-		bool directionEW;
+		char roadName[64];
 		double xStartPoint;
 		double yStartPoint;
 		double xEndPoint;
 		double yEndPoint;
-		double xCoord;
-		double yCoord;
 		int laneNumber;
 		int startIntersection;
 		int endIntersection;
-		int speedLimit;
+		double speedLimitMPS;
+		double speedLimitMPH;
+		double direction;
 
 	public:
 		Road();
 		~Road();
-		bool isPointOnRoad();
-		void setDirectionNS(bool name);
-		void setDirectionEW(bool name);
-		bool getDirectionNS();
-		bool getDirectionEW();
-
-		void setRoadName(string name);
+		bool isPointOnRoad(double xCoord, double yCoord, double direction, char *filename);
+		void setRoadName(char *name);
 		void setxRoadStart(double startingPoint);
 		void setxRoadEnd(double endingPoint);
 		void setyRoadStart(double startingPoint);
 		void setyRoadEnd(double endingPoint);
 		void setLaneNumber(int lane);
+		void setLaneNumberEW(int lane);
 		void setStartIntersection(int startingPoint);
 		void setEndIntersection(int endingPoint);
-		void setSpeedLimit(int limit);
-		void setxCoord(double x);
-		void setyCoord(double y);
+		void setSpeedLimitMPS(double limit);
+		void setSpeedLimitMPH(double limit);
+		void setDirection(double dir);
+		void setRoadData(char *name, double xStart, double yStart, double xEnd, double yEnd, int intersectStart, int intersectEnd, double speedLimit, int numLanes);
 
-		string getRoadName();
+		char * getRoadName();
 		double getxRoadStart();
 		double getxRoadEnd();		
 		double getyRoadStart();
 		double getyRoadEnd();
-		int getLaneNumber();		
+		int getLaneNumber();	
 		int getStartIntersection();		
 		int getEndIntersection();		
-		int getSpeedLimit();
-		double getxCoord();
-		double getyCoord();
+		double getSpeedLimitMPS();
+		double getSpeedLimitMPH();
+		double getDirection();
 };
 
 

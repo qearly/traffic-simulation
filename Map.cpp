@@ -1,3 +1,14 @@
+/*******************************************************************
+*   CS 307 Programming Assignment 2
+*   File: Map.cpp
+*   Author: Matt Stewart
+*   Desc: Implementation file for the Map class, builds roads and intersections.
+*   Date: 4-8-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
+
+
 #define _CRT_SECURE_NO_DEPRECATE 
 #define _CRT_SECURE_NO_WARNINGS 
 
@@ -9,7 +20,8 @@ using namespace std;
 
 Map::Map(char *filename)
 {
-	TrafficSimDataParser *dp = new TrafficSimDataParser(filename);
+	TrafficSimDataParser *dp = TrafficSimDataParser::getInstance();
+	dp->setDataFileName(filename);
 
 	for (int i = 0; i < dp->getRoadCount(); i++)
 	{
@@ -92,6 +104,11 @@ Road * Map::getRoad(char * rdID)
 	return road;
 }
 
+Road * Map::getStartingRoad(char * rdID, char *filename)
+{
+	return nullptr;
+}
+
 Road * Map::getRoad(double x, double y, double dir)
 {
 	double XU;
@@ -159,8 +176,7 @@ Intersection * Map::getIntersection(int id)
 Intersection * Map::getNextIntersection(double x, double y, double dir, char *roadName)
 {
 	bool checkIntersect;
-	double minDist = 100000000000;
-	double dist = 0;
+	double minDist = 100000000000, dist;
 	Intersection *nextInt = NULL;
 
 	for (size_t i = 0; i < iCollect.size(); i++)
@@ -223,7 +239,7 @@ void Map::PrintStatus()
 
 void Map::upDate(double time)
 {
-	TrafficLight *light = new TrafficLight();
+	TrafficLightManager *light = new TrafficLightManager();
 	for (size_t i = 0; i < iCollect.size(); i++)
 	{
 		iCollect[i]->intersectUpDate(light);

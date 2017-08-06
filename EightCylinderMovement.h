@@ -11,10 +11,10 @@ class Vehicle;
 class EightCylinderMovement : public Movement
 {
 private:
-	int counter = 0;
-	int max = 100;
-	double value = 0;
-	bool turnDecided = false;
+	int counter;
+	int max;
+	double value;
+	bool turnDecided;
 	enum turnState { LEFT, STRAIGHT, RIGHT };
 	Vehicle *vehicle;
 	TrafficLightManager *light;

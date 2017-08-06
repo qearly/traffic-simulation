@@ -1,3 +1,17 @@
+/*******************************************************************
+*   CS 307 Programming Assignment 2
+*   File: EightCylinderMovement.cpp
+*   Author: Matt Stewart
+*   Desc: Movement subclass
+*   Date: 4-8-2017
+*
+*   I attest that this program is entirely my own work
+*******************************************************************/
+
+#define _CRT_SECURE_NO_DEPRECATE 
+#define _CRT_SECURE_NO_WARNINGS 
+
+
 #include "EightCylinderMovement.h"
 #include "Vehicle.h"
 #include "VehicleFactory.h"
@@ -13,10 +27,14 @@ using namespace std;
 
 void EightCylinderMovement::Move(char *filename)
 {
-	// I am doing it this way because it makes sure the vehicle data 
-	// and other data will not be reinitialized each time the move function is called
-	if (counter < 1)
+	
+	while (counter == 0)
 	{
+
+		counter = 1;
+		max = 100;
+		value = 0;
+		turnDecided = false;
 		light = new TrafficLightManager();
 		road = new Road();
 		intersection = new Intersection();
@@ -31,7 +49,7 @@ void EightCylinderMovement::Move(char *filename)
 
 		VehicleFactory *inst = new VehicleFactory();
 		vehicle = inst->createVehicle("8-CYLINDER_CAR", filename);
-		// Initalizing an instance of intersection and road. 
+		// Initalizing an instance of intersection 
 
 		int intersectionID;
 		double xPosition;
@@ -52,29 +70,15 @@ void EightCylinderMovement::Move(char *filename)
 			intersection->setNameW(nameW);
 		}
 
-		char name[64];
-		double xStart;
-		double yStart;
-		double xEnd;
-		double yEnd;
-		int intersectStart;
-		int intersectEnd;
-		double speedLimit;
-		int numLanes;
-
-		if (dp->getRoadData(name, &xStart, &yStart, &xEnd, &yEnd, &intersectStart, &intersectEnd, &speedLimit, &numLanes))
-		{
-			road->setRoadData(name, xStart, yStart, xEnd, yEnd, intersectStart, intersectEnd, speedLimit, numLanes);
-		}
+		road = mapInst->getRoad("Avenue D");
 
 		light->UpDate();
 
-		srand((unsigned int)(time(NULL)));
 		counter++;
-	}
+	} 
 
 	// Adjusted x and y locations as the vehicle is moving
-
+	srand((unsigned int)(time(NULL)));
 	double xCenter;
 	double yCenter;
 	double laneWidth = 3.6;
@@ -332,7 +336,7 @@ void EightCylinderMovement::Move(char *filename)
 
 			}
 
-			else if ((stopDistSL > distNextIntersection) && (speedMPS != 0))
+			else if ((stopDist > distNextIntersection) && (speedMPS != 0))
 			{
 
 				while ((stopDist > distNextIntersection) && (distNextIntersection > laneWidth) && (speedMPS > 0))
@@ -480,12 +484,7 @@ void EightCylinderMovement::Move(char *filename)
 				// In other words, if the road we want to turn left on is null
 				if (numLanes == 0)
 				{
-					// Now we are going to decide between turning right and continuing straight.
-					value = rand() % max;
 
-					// 40% of the time we will turn right, else we will continue going straight
-					if (value <= 40)
-					{
 						tempRoad = mapInst->getRoad(intersection->getNameS());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -500,7 +499,6 @@ void EightCylinderMovement::Move(char *filename)
 						road = mapInst->getRoad(intersection->getNameS());
 
 						vehicle->setDirection(270.0);
-					}
 
 				}
 
@@ -528,10 +526,6 @@ void EightCylinderMovement::Move(char *filename)
 				// Same as above
 				if (numLanes == 0)
 				{
-					value = rand() % max;
-
-					if (value <= 40)
-					{
 						tempRoad = mapInst->getRoad(intersection->getNameN());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -545,7 +539,6 @@ void EightCylinderMovement::Move(char *filename)
 
 						road = mapInst->getRoad(intersection->getNameN());
 						vehicle->setDirection(90.0);
-					}
 				}
 
 				else if (numLanes != 0)
@@ -585,9 +578,6 @@ void EightCylinderMovement::Move(char *filename)
 				// Again, same as above
 				if (numLanes == 0)
 				{
-					value = rand() % max;
-					if (value <= 40)
-					{
 						tempRoad = mapInst->getRoad(intersection->getNameE());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -601,7 +591,6 @@ void EightCylinderMovement::Move(char *filename)
 
 						road = mapInst->getRoad(intersection->getNameE());
 						vehicle->setDirection(0.0);
-					}
 
 				}
 
@@ -628,10 +617,7 @@ void EightCylinderMovement::Move(char *filename)
 
 				if (numLanes == 0)
 				{
-					value = rand() % max;
-
-					if (value <= 40)
-					{
+	
 						tempRoad = mapInst->getRoad(intersection->getNameW());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -646,7 +632,6 @@ void EightCylinderMovement::Move(char *filename)
 						road = mapInst->getRoad(intersection->getNameW());
 
 						vehicle->setDirection(180.0);
-					}
 
 				}
 
@@ -686,10 +671,6 @@ void EightCylinderMovement::Move(char *filename)
 
 				if (numLanes == 0)
 				{
-					value = rand() % max;
-
-					if (value <= 40)
-					{
 						tempRoad = mapInst->getRoad(intersection->getNameN());
 
 						numLanes = tempRoad->getLaneNumber();
@@ -699,12 +680,11 @@ void EightCylinderMovement::Move(char *filename)
 						AD = xCenter - vehicle->getxVehicleLocation();
 						BC = AC - AD + BD;
 
-						vehicle->setxVehicleLocation(xCenter - BD);
-						vehicle->setyVehicleLocation(vehicle->getyVehicleLocation() + BC);
+						vehicle->setxVehicleLocation(xCenter + BD);
+						vehicle->setyVehicleLocation(vehicle->getyVehicleLocation() - BC);
 
 						road = mapInst->getRoad(intersection->getNameN());
 						vehicle->setDirection(90.0);
-					}
 
 				}
 
@@ -715,8 +695,8 @@ void EightCylinderMovement::Move(char *filename)
 					AD = xCenter - vehicle->getxVehicleLocation();
 					BC = AC - AD - BD;
 
-					vehicle->setxVehicleLocation(xCenter + BD);
-					vehicle->setyVehicleLocation(vehicle->getyVehicleLocation() - BC);
+					vehicle->setxVehicleLocation(xCenter - BD);
+					vehicle->setyVehicleLocation(vehicle->getyVehicleLocation() + BC);
 
 					road = mapInst->getRoad(intersection->getNameS());
 					vehicle->setDirection(270.0);
@@ -731,9 +711,7 @@ void EightCylinderMovement::Move(char *filename)
 
 				if (numLanes == 0)
 				{
-					value = rand() % max;
-					if (value <= 40)
-					{
+
 						tempRoad = mapInst->getRoad(intersection->getNameS());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -747,7 +725,6 @@ void EightCylinderMovement::Move(char *filename)
 
 						road = mapInst->getRoad(intersection->getNameS());
 						vehicle->setDirection(270.0);
-					}
 				}
 
 				else if (numLanes != 0)
@@ -786,9 +763,7 @@ void EightCylinderMovement::Move(char *filename)
 
 				if (numLanes == 0)
 				{
-					value = rand() % max;
-					if (value <= 40)
-					{
+
 						tempRoad = mapInst->getRoad(intersection->getNameW());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -802,7 +777,6 @@ void EightCylinderMovement::Move(char *filename)
 
 						road = mapInst->getRoad(intersection->getNameW());
 						vehicle->setDirection(180.0);
-					}
 
 				}
 
@@ -829,10 +803,7 @@ void EightCylinderMovement::Move(char *filename)
 
 				if (numLanes == 0)
 				{
-					value = rand() % max;
 
-					if (value <= 40)
-					{
 						tempRoad = mapInst->getRoad(intersection->getNameE());
 						numLanes = tempRoad->getLaneNumber();
 
@@ -846,7 +817,6 @@ void EightCylinderMovement::Move(char *filename)
 
 						road = mapInst->getRoad(intersection->getNameE());
 						vehicle->setDirection(0.0);
-					}
 
 				}
 
